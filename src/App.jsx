@@ -7,7 +7,8 @@ import {
   Copy, Users, Package, Clock, TrendingUp,
   Sparkles, X, Calendar,
   PieChart, ArrowRight, Loader2, CheckCircle2, Circle,
-  ListChecks, Home, Edit3, Save, List, LayoutGrid
+  ListChecks, Home, Edit3, Save, List, LayoutGrid,
+  TrendingDown, Euro, Star, ShoppingBasket, Search
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -166,6 +167,163 @@ function EditModal({ item, onSave, onClose }) {
   )
 }
 
+// PANEL DE COMPARACIÓN DE PRECIOS
+function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
+  if (!show) return null
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        className="w-full max-w-2xl h-[90vh] bg-[#0a0a0f]/95 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <TrendingDown className="w-7 h-7 text-emerald-400" />
+              Comparar Precios
+            </h2>
+            <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {priceComparison && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="text-sm text-emerald-400 mb-1">Mejor opción</div>
+                <div className="text-xl font-bold">{priceComparison.cheapest.supermarket.logo_emoji} {priceComparison.cheapest.supermarket.name}</div>
+                <div className="text-2xl font-black text-emerald-400">{priceComparison.cheapest.total.toFixed(2)}€</div>
+              </div>
+              <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/20">
+                <div className="text-sm text-violet-400 mb-1">Ahorras</div>
+                <div className="text-2xl font-black text-violet-400">{priceComparison.savings.toFixed(2)}€</div>
+                <div className="text-sm text-white/50">vs más caro</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {priceComparison ? (
+            <div className="space-y-3">
+              {priceComparison.comparisons.map((comp, index) => {
+                const percentage = (comp.total / priceComparison.mostExpensive.total) * 100
+                const isCheapest = comp.supermarket.id === priceComparison.cheapest.supermarket.id
+                return (
+                  <motion.div key={comp.supermarket.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}
+                    className={`p-4 rounded-2xl border ${isCheapest ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{comp.supermarket.logo_emoji}</span>
+                        <span className="font-semibold">{comp.supermarket.name}</span>
+                        {isCheapest && <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">MEJOR PRECIO</span>}
+                      </div>
+                      <span className="text-2xl font-bold">{comp.total.toFixed(2)}€</span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ delay: index * 0.05 + 0.2 }}
+                        className={`h-full rounded-full ${isCheapest ? 'bg-gradient-to-r from-emerald-500 to-green-500' : 'bg-gradient-to-r from-violet-500 to-fuchsia-500'}`} />
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-white/50">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          )}
+        </div>
+
+        <div className="p-6 border-t border-white/10">
+          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onShare}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 font-semibold flex items-center justify-center gap-2">
+            <Share2 className="w-5 h-5" />
+            Compartir con precios
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// VISTA DE FAVORITOS
+function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchTerm }) {
+  if (!show) return null
+
+  const filteredFavorites = favorites.filter(f =>
+    f.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const categoryIcons = {
+    'Frutas y Verduras': '🥬', 'Carnes': '🥩', 'Pescados y Mariscos': '🐟', 'Lácteos': '🥛',
+    'Panadería': '🥖', 'Bebidas': '🥤', 'Despensa': '🏺', 'Congelados': '🧊',
+    'Limpieza': '🧹', 'Higiene Personal': '🧴', 'Snacks y Dulces': '🍫', 'Mascotas': '🐾', 'Otros': '📦'
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className="w-full max-w-2xl max-h-[90vh] bg-[#0a0a0f]/95 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Star className="w-7 h-7 text-yellow-400 fill-yellow-400" />
+              Productos Favoritos
+            </h2>
+            <button onClick={onClose} className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+            <input type="text" placeholder="Buscar favorito..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-violet-500/50 placeholder:text-white/30" />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {filteredFavorites.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredFavorites.map((fav, index) => (
+                <motion.div key={fav.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
+                  className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{categoryIcons[fav.category] || '📦'}</span>
+                      <div>
+                        <div className="font-semibold">{fav.name}</div>
+                        <div className="text-sm text-white/50">{fav.quantity} {fav.unit}</div>
+                      </div>
+                    </div>
+                    <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                  </div>
+                  <div className="flex items-center justify-between mt-3">
+                    <span className="text-xs text-white/40">Usado {fav.use_count} {fav.use_count === 1 ? 'vez' : 'veces'}</span>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onAdd(fav)}
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-sm font-semibold flex items-center gap-1">
+                      <Plus className="w-4 h-4" />
+                      Añadir
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-white/50">
+              <Star className="w-16 h-16 mb-4" />
+              <p className="text-lg">No hay favoritos aún</p>
+              <p className="text-sm">Marca productos con ⭐ para acceso rápido</p>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // APP PRINCIPAL
 function App() {
   const navigate = useNavigate()
@@ -184,6 +342,20 @@ function App() {
   const [editingItem, setEditingItem] = useState(null)
   const [viewMode, setViewMode] = useState('compact')
   const inputRef = useRef(null)
+
+  // Estados para comparador de precios
+  const [priceComparison, setPriceComparison] = useState(null)
+  const [showPriceComparison, setShowPriceComparison] = useState(false)
+  const [supermarkets, setSupermarkets] = useState([])
+  const [priceEstimates, setPriceEstimates] = useState({})
+
+  // Estados para modo compra
+  const [shoppingMode, setShoppingMode] = useState(false)
+
+  // Estados para favoritos
+  const [showFavorites, setShowFavorites] = useState(false)
+  const [favorites, setFavorites] = useState([])
+  const [favoriteSearchTerm, setFavoriteSearchTerm] = useState('')
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type })
@@ -209,7 +381,9 @@ function App() {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase()
     const { data, error } = await supabase.from('shopping_lists').insert([{ name: newListName, access_code: code }]).select().single()
     if (error) { showNotification('Error al crear', 'error'); setIsLoading(false); return }
-    setCurrentList(data); setAccessCode(code); setNewListName(''); setIsLoading(false)
+    setCurrentList(data); setAccessCode(code); setNewListName('')
+    setView('list') // Bug fix: actualizar vista antes de navegar
+    setIsLoading(false)
     navigate(`/list/${code}`)
     showNotification('¡Lista creada!')
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
@@ -352,6 +526,296 @@ function App() {
     setIsLoading(false); setView('stats')
   }
 
+  // ==========================================
+  // FUNCIONES PARA COMPARADOR DE PRECIOS
+  // ==========================================
+
+  const loadSupermarkets = async () => {
+    const { data, error } = await supabase
+      .from('supermarkets')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order')
+
+    if (data && !error) {
+      setSupermarkets(data)
+
+      // Cargar precios estimados
+      const { data: estimates } = await supabase
+        .from('price_estimates')
+        .select('*')
+
+      if (estimates) {
+        const estimatesMap = {}
+        estimates.forEach(est => {
+          if (!estimatesMap[est.supermarket_id]) estimatesMap[est.supermarket_id] = {}
+          estimatesMap[est.supermarket_id][est.category] = est.estimated_price_per_unit
+        })
+        setPriceEstimates(estimatesMap)
+      }
+    }
+  }
+
+  const loadPriceComparison = async () => {
+    if (!currentList || !supermarkets.length) return
+
+    setIsLoading(true)
+
+    // Calcular total para cada supermercado
+    const comparisons = []
+
+    for (const supermarket of supermarkets) {
+      let total = 0
+      const pendingItems = items.filter(i => !i.completed)
+
+      for (const item of pendingItems) {
+        // 1. Buscar precio personalizado
+        const { data: customPrice } = await supabase
+          .from('item_prices')
+          .select('custom_price')
+          .eq('item_id', item.id)
+          .eq('supermarket_id', supermarket.id)
+          .single()
+
+        let price = customPrice?.custom_price
+
+        // 2. Si no existe, usar estimado por categoría
+        if (!price) {
+          price = priceEstimates[supermarket.id]?.[item.category] || 0
+        }
+
+        // 3. Multiplicar por cantidad
+        total += (price * (item.quantity || 1))
+      }
+
+      comparisons.push({
+        supermarket: supermarket,
+        total: total,
+        itemCount: pendingItems.length
+      })
+    }
+
+    // Ordenar por precio (más barato primero)
+    comparisons.sort((a, b) => a.total - b.total)
+
+    setPriceComparison({
+      comparisons,
+      cheapest: comparisons[0],
+      mostExpensive: comparisons[comparisons.length - 1],
+      savings: comparisons[comparisons.length - 1].total - comparisons[0].total
+    })
+
+    setIsLoading(false)
+  }
+
+  // ==========================================
+  // FUNCIONES PARA WHATSAPP
+  // ==========================================
+
+  const shareToWhatsApp = async (includePrice = false) => {
+    const url = `${window.location.origin}/list/${currentList.access_code}`
+    const pendingItems = items.filter(i => !i.completed)
+
+    let text = `🛒 *${currentList.name}*\n\n`
+    text += `📋 Productos pendientes (${pendingItems.length}):\n\n`
+
+    // Agrupar por categoría
+    const grouped = pendingItems.reduce((acc, item) => {
+      if (!acc[item.category]) acc[item.category] = []
+      acc[item.category].push(item)
+      return acc
+    }, {})
+
+    // Iconos por categoría
+    const categoryIcons = {
+      'Frutas y Verduras': '🥬',
+      'Carnes': '🥩',
+      'Pescados y Mariscos': '🐟',
+      'Lácteos': '🥛',
+      'Panadería': '🥖',
+      'Bebidas': '🥤',
+      'Despensa': '🏺',
+      'Congelados': '🧊',
+      'Limpieza': '🧹',
+      'Higiene Personal': '🧴',
+      'Snacks y Dulces': '🍫',
+      'Mascotas': '🐾',
+      'Otros': '📦'
+    }
+
+    Object.entries(grouped).forEach(([category, categoryItems]) => {
+      const icon = categoryIcons[category] || '📦'
+      text += `*${icon} ${category}*\n`
+      categoryItems.forEach(item => {
+        text += `  • ${item.name}`
+        if (item.quantity > 1 || item.unit !== 'unidad') {
+          text += ` (${item.quantity} ${item.unit})`
+        }
+        text += '\n'
+      })
+      text += '\n'
+    })
+
+    if (includePrice && priceComparison) {
+      text += `💰 *Mejor precio:* ${priceComparison.cheapest.supermarket.name} - ${priceComparison.cheapest.total.toFixed(2)}€\n\n`
+    }
+
+    text += `🔗 Unirse: ${url}`
+
+    // Intentar Web Share API
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: currentList.name,
+          text: text
+        })
+        showNotification('¡Compartido!')
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          fallbackWhatsAppShare(text)
+        }
+      }
+    } else {
+      fallbackWhatsAppShare(text)
+    }
+  }
+
+  const fallbackWhatsAppShare = (text) => {
+    const encodedText = encodeURIComponent(text)
+    const whatsappUrl = `https://wa.me/?text=${encodedText}`
+    window.open(whatsappUrl, '_blank')
+    showNotification('Abriendo WhatsApp...')
+  }
+
+  // ==========================================
+  // FUNCIONES PARA FAVORITOS
+  // ==========================================
+
+  const loadFavorites = async () => {
+    if (!currentList) return
+
+    const { data, error } = await supabase
+      .from('favorite_products')
+      .select('*')
+      .eq('list_id', currentList.id)
+      .order('use_count', { ascending: false })
+
+    if (data && !error) {
+      setFavorites(data)
+    }
+  }
+
+  const toggleFavorite = async (item) => {
+    // Verificar si ya es favorito
+    const { data: existing } = await supabase
+      .from('favorite_products')
+      .select('id')
+      .eq('list_id', currentList.id)
+      .eq('name', item.name)
+      .single()
+
+    if (existing) {
+      // Eliminar de favoritos
+      await supabase
+        .from('favorite_products')
+        .delete()
+        .eq('id', existing.id)
+
+      showNotification('Eliminado de favoritos')
+    } else {
+      // Añadir a favoritos
+      await supabase
+        .from('favorite_products')
+        .insert([{
+          list_id: currentList.id,
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          category: item.category,
+          use_count: 0
+        }])
+
+      showNotification('¡Añadido a favoritos!', 'success')
+      confetti({ particleCount: 20, spread: 40, origin: { y: 0.6 } })
+    }
+
+    loadFavorites()
+  }
+
+  const addFromFavorite = async (favorite) => {
+    // Añadir a la lista
+    const { error } = await supabase
+      .from('shopping_items')
+      .insert([{
+        list_id: currentList.id,
+        name: favorite.name,
+        quantity: favorite.quantity,
+        unit: favorite.unit,
+        category: favorite.category,
+        completed: false
+      }])
+
+    if (!error) {
+      // Incrementar contador de uso
+      await supabase.rpc('increment_favorite_use', { p_favorite_id: favorite.id })
+
+      showNotification(`${favorite.name} añadido`)
+      loadFavorites()
+    }
+  }
+
+  const isFavorite = (itemName) => {
+    return favorites.some(f => f.name === itemName)
+  }
+
+  // ==========================================
+  // FUNCIONES PARA MODO COMPRA
+  // ==========================================
+
+  const toggleShoppingMode = async () => {
+    if (!currentList) return
+
+    const newMode = !shoppingMode
+    setShoppingMode(newMode)
+
+    // Guardar en BD
+    const { data: existing } = await supabase
+      .from('list_settings')
+      .select('id')
+      .eq('list_id', currentList.id)
+      .single()
+
+    if (existing) {
+      await supabase
+        .from('list_settings')
+        .update({ shopping_mode_enabled: newMode })
+        .eq('id', existing.id)
+    } else {
+      await supabase
+        .from('list_settings')
+        .insert([{
+          list_id: currentList.id,
+          shopping_mode_enabled: newMode
+        }])
+    }
+
+    showNotification(newMode ? 'Modo compra activado' : 'Modo normal', 'success')
+  }
+
+  const loadListSettings = async () => {
+    if (!currentList) return
+
+    const { data } = await supabase
+      .from('list_settings')
+      .select('*')
+      .eq('list_id', currentList.id)
+      .single()
+
+    if (data) {
+      setShoppingMode(data.shopping_mode_enabled)
+    }
+  }
+
   // Cargar lista desde URL al montar
   useEffect(() => {
     const pathname = window.location.pathname
@@ -383,6 +847,11 @@ function App() {
     }
   }, [])
 
+  // Cargar supermercados al inicio
+  useEffect(() => {
+    loadSupermarkets()
+  }, [])
+
   // Sincronizar view con URL
   useEffect(() => {
     const pathname = window.location.pathname
@@ -400,6 +869,8 @@ function App() {
       if (data) setItems(data)
     }
     fetchItems()
+    loadFavorites()
+    loadListSettings()
     const channel = supabase.channel(`list-${currentList.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items', filter: `list_id=eq.${currentList.id}` }, (payload) => {
         // Ignorar eventos propios (< 2 segundos)
@@ -418,7 +889,9 @@ function App() {
     return () => { supabase.removeChannel(channel) }
   }, [currentList])
 
-  const filteredItems = items.filter(item => filterCategory === 'all' || item.category === filterCategory)
+  const filteredItems = items
+    .filter(item => filterCategory === 'all' || item.category === filterCategory)
+    .filter(item => shoppingMode ? !item.completed : true) // En modo compra, ocultar completados
   const groupedItems = filteredItems.reduce((acc, item) => { if (!acc[item.category]) acc[item.category] = []; acc[item.category].push(item); return acc }, {})
   const sortedItems = [...filteredItems].sort((a, b) => { if (a.completed !== b.completed) return a.completed ? 1 : -1; return new Date(b.created_at) - new Date(a.created_at) })
   const activeCategories = [...new Set(items.map(item => item.category))]
@@ -443,8 +916,6 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <AnimatePresence>{editingItem && <EditModal item={editingItem} onSave={updateItem} onClose={() => setEditingItem(null)} />}</AnimatePresence>
 
       {view === 'home' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen flex flex-col items-center justify-center p-4">
@@ -503,9 +974,30 @@ function App() {
                     {copiedCode ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span className="font-mono tracking-wider">{currentList.access_code}</span>
                   </motion.button>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { loadPriceComparison(); setShowPriceComparison(true); }}
+                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10" title="Comparar precios">
+                    <TrendingDown className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
+                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 flex items-center justify-center" title="Compartir por WhatsApp">
+                    <Share2 className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
+                    className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10" title="Favoritos">
+                    <Star className="w-5 h-5" />
+                  </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={loadStats}
                     className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10"><BarChart3 className="w-5 h-5" /></motion.button>
                 </div>
+              </div>
+
+              {/* Toggle modo compra */}
+              <div className="flex items-center gap-2 mb-4">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={toggleShoppingMode}
+                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600' : 'bg-white/5 hover:bg-white/10'}`}>
+                  {shoppingMode ? <Check className="w-4 h-4" /> : <ShoppingBasket className="w-4 h-4" />}
+                  {shoppingMode ? 'Modo Compra Activo' : 'Activar Modo Compra'}
+                </motion.button>
               </div>
 
               <div className="mb-4">
@@ -565,6 +1057,10 @@ function App() {
                         {formatQuantity(item.quantity, item.unit) && <span className="ml-2 text-sm text-white/40">{formatQuantity(item.quantity, item.unit)}</span>}
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleFavorite(item)}
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : 'bg-white/5 hover:bg-yellow-500/20'}`}>
+                          <Star className={`w-3.5 h-3.5 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
+                        </motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingItem(item)}
                           className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center hover:bg-violet-500/20 hover:text-violet-400"><Edit3 className="w-3.5 h-3.5" /></motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteItem(item.id)}
@@ -595,6 +1091,9 @@ function App() {
                             {formatQuantity(item.quantity, item.unit) && <span className="ml-2 text-sm text-white/50">{formatQuantity(item.quantity, item.unit)}</span>}
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => toggleFavorite(item)} className={`w-8 h-8 rounded-xl flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : 'bg-white/5 hover:bg-yellow-500/20'}`}>
+                              <Star className={`w-4 h-4 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
+                            </motion.button>
                             <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditingItem(item)} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-violet-500/20"><Edit3 className="w-4 h-4" /></motion.button>
                             <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteItem(item.id)} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></motion.button>
                           </div>
@@ -702,6 +1201,25 @@ function App() {
           </main>
         </motion.div>
       )}
+
+      {/* Paneles flotantes */}
+      <AnimatePresence>
+        <PriceComparisonPanel
+          show={showPriceComparison}
+          onClose={() => setShowPriceComparison(false)}
+          priceComparison={priceComparison}
+          onShare={() => shareToWhatsApp(true)}
+        />
+        <FavoritesView
+          show={showFavorites}
+          onClose={() => setShowFavorites(false)}
+          favorites={favorites}
+          onAdd={addFromFavorite}
+          searchTerm={favoriteSearchTerm}
+          setSearchTerm={setFavoriteSearchTerm}
+        />
+        {editingItem && <EditModal item={editingItem} onSave={updateItem} onClose={() => setEditingItem(null)} />}
+      </AnimatePresence>
     </div>
   )
 }
