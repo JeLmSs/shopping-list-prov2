@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ShoppingCart, Plus, Trash2, Check, Share2, BarChart3, 
+import { useNavigate } from 'react-router-dom'
+import {
+  ShoppingCart, Plus, Trash2, Check, Share2, BarChart3,
   Copy, Users, Package, Clock, TrendingUp,
   Sparkles, X, Calendar,
   PieChart, ArrowRight, Loader2, CheckCircle2, Circle,
@@ -167,6 +168,7 @@ function EditModal({ item, onSave, onClose }) {
 
 // APP PRINCIPAL
 function App() {
+  const navigate = useNavigate()
   const [view, setView] = useState('home')
   const [currentList, setCurrentList] = useState(null)
   const [items, setItems] = useState([])
@@ -194,9 +196,10 @@ function App() {
   }
 
   const copyCode = () => {
-    navigator.clipboard.writeText(currentList?.access_code || accessCode)
+    const url = `${window.location.origin}/list/${currentList?.access_code || accessCode}`
+    navigator.clipboard.writeText(url)
     setCopiedCode(true)
-    showNotification('¡Código copiado!')
+    showNotification('¡Enlace copiado!')
     setTimeout(() => setCopiedCode(false), 2000)
   }
 
@@ -206,7 +209,8 @@ function App() {
     const code = Math.random().toString(36).substring(2, 8).toUpperCase()
     const { data, error } = await supabase.from('shopping_lists').insert([{ name: newListName, access_code: code }]).select().single()
     if (error) { showNotification('Error al crear', 'error'); setIsLoading(false); return }
-    setCurrentList(data); setAccessCode(code); setNewListName(''); setView('list'); setIsLoading(false)
+    setCurrentList(data); setAccessCode(code); setNewListName(''); setIsLoading(false)
+    navigate(`/list/${code}`)
     showNotification('¡Lista creada!')
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
   }
@@ -216,7 +220,9 @@ function App() {
     setIsLoading(true)
     const { data, error } = await supabase.from('shopping_lists').select('*').eq('access_code', accessCode.toUpperCase()).single()
     if (error || !data) { showNotification('Código no encontrado', 'error'); setIsLoading(false); return }
-    setCurrentList(data); setView('list'); setIsLoading(false); showNotification('¡Te has unido!')
+    setCurrentList(data); setIsLoading(false)
+    navigate(`/list/${accessCode.toUpperCase()}`)
+    showNotification('¡Te has unido!')
   }
 
   const addItem = async (e) => {
@@ -230,19 +236,95 @@ function App() {
   }
 
   const updateItem = async (updatedItem) => {
-    const { error } = await supabase.from('shopping_items').update({ name: updatedItem.name, quantity: updatedItem.quantity, unit: updatedItem.unit, category: updatedItem.category }).eq('id', updatedItem.id)
-    showNotification(error ? 'Error al actualizar' : 'Actualizado', error ? 'error' : 'success')
-  }
+    const previousItems = [...items]
 
-  const toggleComplete = async (item) => {
-    await supabase.from('shopping_items').update({ completed: !item.completed, completed_at: !item.completed ? new Date().toISOString() : null }).eq('id', item.id)
-    if (!item.completed) {
-      await supabase.from('purchase_history').insert([{ list_id: currentList.id, item_name: item.name, category: item.category, action: 'purchased' }])
-      confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 }, colors: ['#10b981', '#34d399', '#6ee7b7'] })
+    // UPDATE INMEDIATO (optimista)
+    setItems(prev => prev.map(item =>
+      item.id === updatedItem.id ? updatedItem : item
+    ))
+
+    try {
+      const { error } = await supabase
+        .from('shopping_items')
+        .update({
+          name: updatedItem.name,
+          quantity: updatedItem.quantity,
+          unit: updatedItem.unit,
+          category: updatedItem.category
+        })
+        .eq('id', updatedItem.id)
+
+      if (error) throw error
+      showNotification('Actualizado', 'success')
+    } catch (error) {
+      // ROLLBACK
+      setItems(previousItems)
+      showNotification('Error al actualizar', 'error')
     }
   }
 
-  const deleteItem = async (id) => { await supabase.from('shopping_items').delete().eq('id', id) }
+  const toggleComplete = async (item) => {
+    const previousItems = [...items]
+    const newCompleted = !item.completed
+
+    // UPDATE INMEDIATO (optimista)
+    setItems(prev => prev.map(i =>
+      i.id === item.id
+        ? { ...i, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null }
+        : i
+    ))
+
+    // Confetti inmediato
+    if (newCompleted) {
+      confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 }, colors: ['#10b981', '#34d399', '#6ee7b7'] })
+    }
+
+    try {
+      const { error } = await supabase
+        .from('shopping_items')
+        .update({
+          completed: newCompleted,
+          completed_at: newCompleted ? new Date().toISOString() : null
+        })
+        .eq('id', item.id)
+
+      if (error) throw error
+
+      // Historial solo si no falla
+      if (newCompleted) {
+        await supabase.from('purchase_history').insert([{
+          list_id: currentList.id,
+          item_name: item.name,
+          category: item.category,
+          action: 'purchased'
+        }])
+      }
+    } catch (error) {
+      // ROLLBACK
+      setItems(previousItems)
+      showNotification('Error al actualizar', 'error')
+    }
+  }
+
+  const deleteItem = async (id) => {
+    const previousItems = [...items]
+
+    // DELETE INMEDIATO (optimista)
+    setItems(prev => prev.filter(item => item.id !== id))
+
+    try {
+      const { error } = await supabase
+        .from('shopping_items')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+    } catch (error) {
+      // ROLLBACK
+      setItems(previousItems)
+      showNotification('Error al eliminar', 'error')
+    }
+  }
 
   const clearCompleted = async () => {
     const completed = items.filter(i => i.completed)
@@ -270,6 +352,47 @@ function App() {
     setIsLoading(false); setView('stats')
   }
 
+  // Cargar lista desde URL al montar
+  useEffect(() => {
+    const pathname = window.location.pathname
+    const match = pathname.match(/^\/list\/([A-Z0-9]{6})$/i)
+
+    if (match) {
+      const code = match[1].toUpperCase()
+      const loadListFromUrl = async () => {
+        setIsLoading(true)
+        const { data, error } = await supabase
+          .from('shopping_lists')
+          .select('*')
+          .eq('access_code', code)
+          .single()
+
+        if (data && !error) {
+          setCurrentList(data)
+          setAccessCode(code)
+          setView('list')
+        } else {
+          showNotification('Lista no encontrada', 'error')
+          navigate('/')
+        }
+        setIsLoading(false)
+      }
+      loadListFromUrl()
+    } else if (pathname === '/') {
+      setView('home')
+    }
+  }, [])
+
+  // Sincronizar view con URL
+  useEffect(() => {
+    const pathname = window.location.pathname
+    if (pathname === '/' && view !== 'home') {
+      setView('home')
+      setCurrentList(null)
+      setItems([])
+    }
+  }, [window.location.pathname])
+
   useEffect(() => {
     if (!currentList) return
     const fetchItems = async () => {
@@ -279,6 +402,13 @@ function App() {
     fetchItems()
     const channel = supabase.channel(`list-${currentList.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items', filter: `list_id=eq.${currentList.id}` }, (payload) => {
+        // Ignorar eventos propios (< 2 segundos)
+        const eventTime = new Date(payload.new?.updated_at || payload.commit_timestamp)
+        if (Date.now() - eventTime < 2000) {
+          return // Probablemente nuestro cambio
+        }
+
+        // Procesar eventos externos
         if (payload.eventType === 'INSERT') setItems(prev => [payload.new, ...prev])
         else if (payload.eventType === 'UPDATE') setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new : item))
         else if (payload.eventType === 'DELETE') setItems(prev => prev.filter(item => item.id !== payload.old.id))
@@ -360,7 +490,7 @@ function App() {
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { setView('home'); setCurrentList(null); setItems([]) }}
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { navigate('/'); setCurrentList(null); setItems([]) }}
                     className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10"><Home className="w-5 h-5" /></motion.button>
                   <div>
                     <h1 className="text-xl font-bold">{currentList.name}</h1>
