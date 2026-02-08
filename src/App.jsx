@@ -456,12 +456,12 @@ function App() {
   const isDark = theme === 'dark'
   const bg = isDark ? 'bg-[#121212]' : 'bg-gray-50'
   const bgCard = isDark ? 'bg-[#1e1e1e]' : 'bg-white'
-  const bgInput = isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'
-  const bgHover = isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-200'
+  const bgInput = isDark ? 'bg-[#2a2a2a]' : 'bg-white'  // Mayor contraste en modo claro
+  const bgHover = isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'  // Hover más sutil
   const text = isDark ? 'text-[#e0e0e0]' : 'text-gray-900'
   const textMuted = isDark ? 'text-[#a0a0a0]' : 'text-gray-500'
-  const border = isDark ? 'border-white/10' : 'border-gray-200'
-  const bgHeader = isDark ? 'bg-[#121212]/80' : 'bg-gray-50/80'
+  const border = isDark ? 'border-white/10' : 'border-gray-300'  // Border más visible
+  const bgHeader = isDark ? 'bg-[#121212]/80' : 'bg-gray-50/95'
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type })
@@ -1245,45 +1245,54 @@ function App() {
           <header className={`sticky top-0 z-40 backdrop-blur-xl ${bgHeader} border-b ${border}`}>
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { navigate('/'); setCurrentList(null); setItems([]) }}
-                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><Home className="w-5 h-5" /></motion.button>
-                  <div>
-                    <h1 className={`text-xl font-bold ${text}`}>{currentList.name}</h1>
-                    {activeUsers > 1 && <div className={`flex items-center gap-1 text-sm ${textMuted}`}><span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />{activeUsers} online</div>}
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text} border ${border}`} title="Volver al inicio">
+                    <Home className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </motion.button>
+                  <div className="min-w-0">
+                    <h1 className={`text-base sm:text-xl font-bold ${text} truncate`}>{currentList.name}</h1>
+                    {activeUsers > 1 && <div className={`flex items-center gap-1 text-xs sm:text-sm ${textMuted}`}><span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />{activeUsers} online</div>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Botón copiar código - compacto en móvil */}
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={copyCode}
-                    className={`flex items-center gap-2 px-3 py-2 ${bgInput} rounded-xl text-sm ${bgHover} ${text}`}>
-                    {copiedCode ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    <span className="font-mono tracking-wider">{currentList.access_code}</span>
+                    className={`flex items-center gap-1.5 px-2 sm:px-3 py-2 ${bgInput} rounded-xl text-xs sm:text-sm ${bgHover} ${text} border ${border}`}>
+                    {copiedCode ? <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                    <span className="font-mono tracking-wider text-xs">{currentList.access_code}</span>
                   </motion.button>
+
+                  {/* Botones ocultos en móvil */}
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { loadPriceComparison(); setShowPriceComparison(true); }}
-                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title="Comparar precios">
+                    className={`hidden sm:flex w-10 h-10 rounded-xl ${bgInput} items-center justify-center ${bgHover} ${text} border ${border}`} title="Comparar precios">
                     <TrendingDown className="w-5 h-5" />
                   </motion.button>
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white flex items-center justify-center" title="Compartir por WhatsApp">
-                    <Share2 className="w-5 h-5" />
-                  </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
-                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title="Favoritos">
+                    className={`hidden sm:flex w-10 h-10 rounded-xl ${bgInput} items-center justify-center ${bgHover} ${text} border ${border}`} title="Favoritos">
                     <Star className="w-5 h-5" />
                   </motion.button>
+
+                  {/* Botones siempre visibles */}
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-green-600/20" title="Compartir por WhatsApp">
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleTheme}
-                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}>
-                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text} border ${border}`} title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}>
+                    {isDark ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={loadStats}
-                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><BarChart3 className="w-5 h-5" /></motion.button>
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text} border ${border}`} title="Estadísticas">
+                    <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </motion.button>
                 </div>
               </div>
 
               {/* Toggle modo compra */}
               <div className="flex items-center gap-2 mb-4">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={toggleShoppingMode}
-                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white' : `${bgInput} ${bgHover} ${text}`}`}>
+                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-600/20' : `${bgInput} ${bgHover} ${text} border ${border}`}`}>
                   {shoppingMode ? <Check className="w-4 h-4" /> : <ShoppingBasket className="w-4 h-4" />}
                   {shoppingMode ? 'Modo Compra Activo' : 'Activar Modo Compra'}
                 </motion.button>
@@ -1291,7 +1300,7 @@ function App() {
 
               <div className="mb-4">
                 <div className="flex justify-between text-sm mb-2"><span className={textMuted}>{pendingItems} pendientes</span><span className="text-emerald-400">{completedCount} completados</span></div>
-                <div className={`h-2 ${bgInput} rounded-full overflow-hidden`}>
+                <div className={`h-2 ${bgInput} border ${border} rounded-full overflow-hidden`}>
                   <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" />
                 </div>
               </div>
@@ -1321,18 +1330,18 @@ function App() {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <div className={`flex ${bgInput} rounded-xl p-1`}>
-                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-emerald-500 text-white' : textMuted}`}>
+                <div className={`flex ${bgInput} rounded-xl p-1 border ${border}`}>
+                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : textMuted}`}>
                     <List className="w-4 h-4" /><span className="hidden sm:inline">Lista</span>
                   </button>
-                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-emerald-500 text-white' : textMuted}`}>
+                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : textMuted}`}>
                     <LayoutGrid className="w-4 h-4" /><span className="hidden sm:inline">Categorías</span>
                   </button>
                 </div>
                 <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap ${filterCategory === 'all' ? 'bg-emerald-500 text-white' : `${bgInput} ${text}`}`}>Todos</button>
+                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap border ${filterCategory === 'all' ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30' : `${bgInput} ${text} ${border}`}`}>Todos</button>
                   {activeCategories.map(cat => (
-                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 ${filterCategory === cat ? 'bg-emerald-500 text-white' : `${bgInput} ${text}`}`}>
+                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 border ${filterCategory === cat ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/30' : `${bgInput} ${text} ${border}`}`}>
                       <span>{CATEGORY_ICONS[cat]}</span><span className="hidden sm:inline">{cat}</span>
                     </button>
                   ))}
