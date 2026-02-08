@@ -8,7 +8,7 @@ import {
   Sparkles, X, Calendar,
   PieChart, ArrowRight, Loader2, CheckCircle2, Circle,
   ListChecks, Home, Edit3, Save, List, LayoutGrid,
-  TrendingDown, Euro, Star, ShoppingBasket, Search
+  TrendingDown, Euro, Star, ShoppingBasket, Search, ExternalLink
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -72,12 +72,12 @@ const CATEGORY_COLORS = {
   'Pescados y Mariscos': 'from-cyan-500 to-blue-600',
   'Lácteos': 'from-amber-400 to-yellow-500',
   'Panadería': 'from-orange-400 to-amber-500',
-  'Bebidas': 'from-purple-500 to-violet-600',
+  'Bebidas': 'from-green-500 to-emerald-600',
   'Despensa': 'from-stone-500 to-zinc-600',
   'Congelados': 'from-sky-400 to-cyan-500',
   'Limpieza': 'from-teal-500 to-emerald-600',
   'Higiene Personal': 'from-pink-500 to-rose-500',
-  'Snacks y Dulces': 'from-fuchsia-500 to-pink-600',
+  'Snacks y Dulces': 'from-lime-500 to-pink-600',
   'Mascotas': 'from-lime-500 to-green-500',
   'Otros': 'from-slate-500 to-gray-600'
 }
@@ -86,16 +86,19 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
 const UNITS = ['unidad', 'kg', 'g', 'L', 'ml', 'docena', 'paquete', 'lata', 'botella', 'bolsa', 'bote', 'tarrina', 'bandeja', 'manojo', 'racimo']
 
 // MODAL DE EDICIÓN
-function EditModal({ item, onSave, onClose }) {
+function EditModal({ item, onSave, onClose, supermarkets = [] }) {
   const [name, setName] = useState(item.name)
   const [quantity, setQuantity] = useState(item.quantity || 1)
   const [unit, setUnit] = useState(item.unit || 'unidad')
   const [category, setCategory] = useState(item.category)
+  const [productUrl, setProductUrl] = useState(item.product_url || '')
+  const [showPrices, setShowPrices] = useState(false)
+  const [prices, setPrices] = useState({})
   const [isLoading, setIsLoading] = useState(false)
-  
+
   const handleSave = async () => {
     setIsLoading(true)
-    await onSave({ ...item, name, quantity, unit, category })
+    await onSave({ ...item, name, quantity, unit, category, product_url: productUrl, prices })
     setIsLoading(false)
     onClose()
   }
@@ -113,7 +116,7 @@ function EditModal({ item, onSave, onClose }) {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold flex items-center gap-2">
-            <Edit3 className="w-5 h-5 text-violet-400" />Editar producto
+            <Edit3 className="w-5 h-5 text-emerald-400" />Editar producto
           </h2>
           <button onClick={onClose} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10"><X className="w-4 h-4" /></button>
         </div>
@@ -122,7 +125,7 @@ function EditModal({ item, onSave, onClose }) {
           <div>
             <label className="text-sm text-white/50 mb-1 block">Nombre</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-violet-500/50" />
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50" />
           </div>
           
           <div className="grid grid-cols-2 gap-3">
@@ -153,12 +156,51 @@ function EditModal({ item, onSave, onClose }) {
               {ALL_CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#12121a]">{CATEGORY_ICONS[cat]} {cat}</option>)}
             </select>
           </div>
+
+          <div>
+            <label className="text-sm text-white/50 mb-1 block">URL del producto (opcional)</label>
+            <input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 text-sm" />
+          </div>
+
+          {supermarkets.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowPrices(!showPrices)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white/5 rounded-2xl hover:bg-white/10"
+              >
+                <span className="text-sm text-white/70">💰 Precios por supermercado (opcional)</span>
+                <span className="text-xs">{showPrices ? '▼' : '▶'}</span>
+              </button>
+              {showPrices && (
+                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                  {supermarkets.map(sm => (
+                    <div key={sm.id} className="flex items-center gap-2">
+                      <span className="text-lg">{sm.logo_emoji}</span>
+                      <span className="text-xs text-white/50 flex-1">{sm.name}</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="€"
+                        value={prices[sm.id] || ''}
+                        onChange={(e) => setPrices({ ...prices, [sm.id]: e.target.value })}
+                        className="w-20 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-sm text-right focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 py-3 px-6 bg-white/5 rounded-2xl font-medium hover:bg-white/10">Cancelar</button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleSave}
-            disabled={isLoading || !name.trim()} className="flex-1 py-3 px-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
+            disabled={isLoading || !name.trim()} className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-600 to-lime-600 rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" />Guardar</>}
           </motion.button>
         </div>
@@ -194,9 +236,9 @@ function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
                 <div className="text-xl font-bold">{priceComparison.cheapest.supermarket.logo_emoji} {priceComparison.cheapest.supermarket.name}</div>
                 <div className="text-2xl font-black text-emerald-400">{priceComparison.cheapest.total.toFixed(2)}€</div>
               </div>
-              <div className="p-4 rounded-2xl bg-violet-500/10 border border-violet-500/20">
-                <div className="text-sm text-violet-400 mb-1">Ahorras</div>
-                <div className="text-2xl font-black text-violet-400">{priceComparison.savings.toFixed(2)}€</div>
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <div className="text-sm text-emerald-400 mb-1">Ahorras</div>
+                <div className="text-2xl font-black text-emerald-400">{priceComparison.savings.toFixed(2)}€</div>
                 <div className="text-sm text-white/50">vs más caro</div>
               </div>
             </div>
@@ -222,7 +264,7 @@ function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
                     </div>
                     <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ delay: index * 0.05 + 0.2 }}
-                        className={`h-full rounded-full ${isCheapest ? 'bg-gradient-to-r from-emerald-500 to-green-500' : 'bg-gradient-to-r from-violet-500 to-fuchsia-500'}`} />
+                        className={`h-full rounded-full ${isCheapest ? 'bg-gradient-to-r from-emerald-500 to-green-500' : 'bg-gradient-to-r from-emerald-500 to-lime-500'}`} />
                     </div>
                   </motion.div>
                 )
@@ -280,7 +322,7 @@ function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchT
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
             <input type="text" placeholder="Buscar favorito..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-violet-500/50 placeholder:text-white/30" />
+              className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-white/30" />
           </div>
         </div>
 
@@ -303,7 +345,7 @@ function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchT
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs text-white/40">Usado {fav.use_count} {fav.use_count === 1 ? 'vez' : 'veces'}</span>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onAdd(fav)}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 text-sm font-semibold flex items-center gap-1">
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-lime-600 text-sm font-semibold flex items-center gap-1">
                       <Plus className="w-4 h-4" />
                       Añadir
                     </motion.button>
@@ -402,11 +444,56 @@ function App() {
   const addItem = async (e) => {
     e.preventDefault()
     if (!newItemName.trim()) return
+
     const category = detectCategory(newItemName)
-    const { error } = await supabase.from('shopping_items').insert([{ list_id: currentList.id, name: newItemName.trim(), quantity: 1, unit: 'unidad', category, completed: false }])
-    if (error) { showNotification('Error al añadir', 'error'); return }
-    await supabase.from('purchase_history').insert([{ list_id: currentList.id, item_name: newItemName.trim(), category, action: 'added' }])
-    setNewItemName(''); inputRef.current?.focus()
+    const tempId = `temp-${Date.now()}`
+    const newItem = {
+      id: tempId,
+      list_id: currentList.id,
+      name: newItemName.trim(),
+      quantity: 1,
+      unit: 'unidad',
+      category,
+      completed: false,
+      created_at: new Date().toISOString()
+    }
+
+    // UPDATE INMEDIATO (optimista)
+    setItems(prev => [newItem, ...prev])
+    setNewItemName('')
+    inputRef.current?.focus()
+
+    try {
+      const { data, error } = await supabase
+        .from('shopping_items')
+        .insert([{
+          list_id: currentList.id,
+          name: newItem.name,
+          quantity: newItem.quantity,
+          unit: newItem.unit,
+          category: newItem.category,
+          completed: false
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Reemplazar temp ID con ID real
+      setItems(prev => prev.map(item => item.id === tempId ? data : item))
+
+      await supabase.from('purchase_history').insert([{
+        list_id: currentList.id,
+        item_name: newItem.name,
+        category: newItem.category,
+        action: 'added'
+      }])
+    } catch (error) {
+      // ROLLBACK
+      setItems(prev => prev.filter(item => item.id !== tempId))
+      showNotification('Error al añadir', 'error')
+      setNewItemName(newItem.name)
+    }
   }
 
   const updateItem = async (updatedItem) => {
@@ -424,11 +511,34 @@ function App() {
           name: updatedItem.name,
           quantity: updatedItem.quantity,
           unit: updatedItem.unit,
-          category: updatedItem.category
+          category: updatedItem.category,
+          product_url: updatedItem.product_url || null
         })
         .eq('id', updatedItem.id)
 
       if (error) throw error
+
+      // Guardar precios personalizados si existen
+      if (updatedItem.prices && Object.keys(updatedItem.prices).length > 0) {
+        for (const [supermarketId, price] of Object.entries(updatedItem.prices)) {
+          if (price && parseFloat(price) > 0) {
+            await supabase
+              .from('item_prices')
+              .upsert({
+                item_id: updatedItem.id,
+                list_id: currentList.id,
+                supermarket_id: supermarketId,
+                price: parseFloat(price),
+                is_real_price: true,
+                source: 'manual',
+                last_verified_at: new Date().toISOString()
+              }, {
+                onConflict: 'item_id,supermarket_id'
+              })
+          }
+        }
+      }
+
       showNotification('Actualizado', 'success')
     } catch (error) {
       // ROLLBACK
@@ -873,16 +983,35 @@ function App() {
     loadListSettings()
     const channel = supabase.channel(`list-${currentList.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items', filter: `list_id=eq.${currentList.id}` }, (payload) => {
-        // Ignorar eventos propios (< 2 segundos)
-        const eventTime = new Date(payload.new?.updated_at || payload.commit_timestamp)
-        if (Date.now() - eventTime < 2000) {
-          return // Probablemente nuestro cambio
+        // Para INSERT: solo ignorar si ya existe (por optimistic update)
+        if (payload.eventType === 'INSERT') {
+          setItems(prev => {
+            // Si ya existe un item con este ID (del optimistic update), reemplazarlo
+            const exists = prev.some(item => item.id === payload.new.id)
+            if (exists) return prev.map(item => item.id === payload.new.id ? payload.new : item)
+            // Si es totalmente nuevo, agregarlo solo si no es muy reciente (evitar duplicados de otros dispositivos)
+            const eventTime = new Date(payload.new.created_at)
+            if (Date.now() - eventTime < 1000) {
+              // Verificar si ya tenemos un temp item con el mismo nombre
+              const hasTempWithSameName = prev.some(item =>
+                item.id.toString().startsWith('temp-') &&
+                item.name === payload.new.name &&
+                Math.abs(new Date(item.created_at) - eventTime) < 2000
+              )
+              if (hasTempWithSameName) return prev // Ya lo tenemos como temp
+            }
+            return [payload.new, ...prev]
+          })
         }
-
-        // Procesar eventos externos
-        if (payload.eventType === 'INSERT') setItems(prev => [payload.new, ...prev])
-        else if (payload.eventType === 'UPDATE') setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new : item))
-        else if (payload.eventType === 'DELETE') setItems(prev => prev.filter(item => item.id !== payload.old.id))
+        else if (payload.eventType === 'UPDATE') {
+          // Para UPDATE: ignorar eventos recientes (probablemente nuestros)
+          const eventTime = new Date(payload.new.updated_at || payload.commit_timestamp)
+          if (Date.now() - eventTime < 2000) return
+          setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new : item))
+        }
+        else if (payload.eventType === 'DELETE') {
+          setItems(prev => prev.filter(item => item.id !== payload.old.id))
+        }
       })
       .on('presence', { event: 'sync' }, () => { setActiveUsers(Object.keys(channel.presenceState()).length) })
       .subscribe(async (status) => { if (status === 'SUBSCRIBED') await channel.track({ user: Date.now() }) })
@@ -903,7 +1032,7 @@ function App() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
       </div>
@@ -920,22 +1049,22 @@ function App() {
       {view === 'home' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen flex flex-col items-center justify-center p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-600 mb-6 shadow-2xl shadow-violet-500/30">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-lime-600 mb-6 shadow-2xl shadow-emerald-500/30">
               <ShoppingCart className="w-12 h-12" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-white via-violet-200 to-fuchsia-200 bg-clip-text text-transparent">ListaCompra</span>
+              <span className="bg-gradient-to-r from-white via-emerald-200 to-lime-200 bg-clip-text text-transparent">ListaCompra</span>
             </h1>
             <p className="text-lg text-white/50">Listas compartidas en tiempo real</p>
           </motion.div>
 
           <div className="w-full max-w-md space-y-6">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-violet-400" />Crear nueva lista</h2>
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400" />Crear nueva lista</h2>
               <input type="text" placeholder="Nombre de la lista" value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && createList()}
-                className="w-full px-4 py-3 mb-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-violet-500/50 placeholder:text-white/30" />
+                className="w-full px-4 py-3 mb-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-white/30" />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={createList} disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-lime-600 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" />Crear lista</>}
               </motion.button>
             </motion.div>
@@ -1009,9 +1138,9 @@ function App() {
 
               <form onSubmit={addItem} className="flex gap-2">
                 <input ref={inputRef} type="text" placeholder="Añadir producto..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-violet-500/50 placeholder:text-white/30" />
+                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-white/30" />
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
-                  className="w-12 h-12 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
+                  className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
               </form>
 
               <div className="flex items-center gap-2 mt-4">
@@ -1053,8 +1182,16 @@ function App() {
                       </motion.button>
                       <span className="text-lg">{CATEGORY_ICONS[item.category]}</span>
                       <div className="flex-1 min-w-0">
-                        <span className={`font-medium truncate ${item.completed ? 'line-through text-white/50' : ''}`}>{item.name}</span>
-                        {formatQuantity(item.quantity, item.unit) && <span className="ml-2 text-sm text-white/40">{formatQuantity(item.quantity, item.unit)}</span>}
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium truncate ${item.completed ? 'line-through text-white/50' : ''}`}>{item.name}</span>
+                          {item.product_url && (
+                            <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                              className="text-emerald-400 hover:text-emerald-300">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          )}
+                        </div>
+                        {formatQuantity(item.quantity, item.unit) && <span className="text-sm text-white/40">{formatQuantity(item.quantity, item.unit)}</span>}
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleFavorite(item)}
@@ -1062,7 +1199,7 @@ function App() {
                           <Star className={`w-3.5 h-3.5 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
                         </motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingItem(item)}
-                          className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center hover:bg-violet-500/20 hover:text-violet-400"><Edit3 className="w-3.5 h-3.5" /></motion.button>
+                          className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center hover:bg-emerald-500/20 hover:text-emerald-400"><Edit3 className="w-3.5 h-3.5" /></motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteItem(item.id)}
                           className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center hover:bg-red-500/20 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></motion.button>
                       </div>
@@ -1087,14 +1224,22 @@ function App() {
                             {item.completed ? <Check className="w-5 h-5" /> : <Circle className="w-5 h-5 text-white/30" />}
                           </motion.button>
                           <div className="flex-1">
-                            <span className={`font-medium ${item.completed ? 'line-through text-white/50' : ''}`}>{item.name}</span>
-                            {formatQuantity(item.quantity, item.unit) && <span className="ml-2 text-sm text-white/50">{formatQuantity(item.quantity, item.unit)}</span>}
+                            <div className="flex items-center gap-2">
+                              <span className={`font-medium ${item.completed ? 'line-through text-white/50' : ''}`}>{item.name}</span>
+                              {item.product_url && (
+                                <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                                  className="text-emerald-400 hover:text-emerald-300">
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              )}
+                            </div>
+                            {formatQuantity(item.quantity, item.unit) && <span className="text-sm text-white/50">{formatQuantity(item.quantity, item.unit)}</span>}
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                             <motion.button whileHover={{ scale: 1.1 }} onClick={() => toggleFavorite(item)} className={`w-8 h-8 rounded-xl flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : 'bg-white/5 hover:bg-yellow-500/20'}`}>
                               <Star className={`w-4 h-4 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
                             </motion.button>
-                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditingItem(item)} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-violet-500/20"><Edit3 className="w-4 h-4" /></motion.button>
+                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditingItem(item)} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-emerald-500/20"><Edit3 className="w-4 h-4" /></motion.button>
                             <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteItem(item.id)} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></motion.button>
                           </div>
                         </motion.div>
@@ -1133,12 +1278,12 @@ function App() {
 
           <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
             {isLoading ? (
-              <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-violet-400" /></div>
+              <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-emerald-400" /></div>
             ) : stats ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 border border-violet-500/20">
-                    <TrendingUp className="w-6 h-6 text-violet-400 mb-2" /><div className="text-3xl font-bold">{stats.totalPurchases}</div><div className="text-sm text-white/50">Compras totales</div>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-lime-500/20 border border-emerald-500/20">
+                    <TrendingUp className="w-6 h-6 text-emerald-400 mb-2" /><div className="text-3xl font-bold">{stats.totalPurchases}</div><div className="text-sm text-white/50">Compras totales</div>
                   </motion.div>
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20">
                     <Calendar className="w-6 h-6 text-emerald-400 mb-2" /><div className="text-xl font-bold">{stats.mostActiveDay}</div><div className="text-sm text-white/50">Día más activo</div>
@@ -1146,7 +1291,7 @@ function App() {
                 </div>
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-3xl bg-white/5 border border-white/10">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Package className="w-5 h-5 text-violet-400" />Top productos</h3>
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Package className="w-5 h-5 text-emerald-400" />Top productos</h3>
                   <div className="space-y-3">
                     {stats.topProducts.length > 0 ? stats.topProducts.map(([name, count], i) => (
                       <div key={name} className="flex items-center gap-3">
@@ -1154,7 +1299,7 @@ function App() {
                         <div className="flex-1">
                           <div className="flex justify-between mb-1"><span className="font-medium">{name}</span><span className="text-white/50">{count}x</span></div>
                           <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                            <motion.div initial={{ width: 0 }} animate={{ width: `${(count / stats.topProducts[0][1]) * 100}%` }} className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full" />
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${(count / stats.topProducts[0][1]) * 100}%` }} className="h-full bg-gradient-to-r from-emerald-500 to-lime-500 rounded-full" />
                           </div>
                         </div>
                       </div>
@@ -1218,7 +1363,7 @@ function App() {
           searchTerm={favoriteSearchTerm}
           setSearchTerm={setFavoriteSearchTerm}
         />
-        {editingItem && <EditModal item={editingItem} onSave={updateItem} onClose={() => setEditingItem(null)} />}
+        {editingItem && <EditModal item={editingItem} supermarkets={supermarkets} onSave={updateItem} onClose={() => setEditingItem(null)} />}
       </AnimatePresence>
     </div>
   )
