@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -209,6 +209,38 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
   )
 }
 
+// COMPARADOR INLINE DE PRECIOS
+function InlinePriceComparator({ item, supermarkets, priceEstimates, getDeepLink }) {
+  const [show, setShow] = useState(false)
+  const prices = supermarkets.map(sm => ({
+    sm,
+    price: priceEstimates[sm.id]?.[item.category] || 0
+  })).filter(p => p.price > 0).sort((a, b) => a.price - b.price)
+
+  if (prices.length === 0) return null
+  const cheapest = prices[0]
+
+  return (
+    <div className="relative">
+      <button onClick={() => setShow(!show)} className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 flex items-center gap-1">
+        <TrendingDown className="w-3 h-3" />
+        <span>{cheapest.sm.logo_emoji} {cheapest.price.toFixed(2)}€</span>
+      </button>
+      {show && (
+        <div className="absolute top-full left-0 mt-1 bg-[#12121a] border border-white/10 rounded-xl p-2 shadow-xl z-50 min-w-48">
+          {prices.slice(0, 3).map((p, i) => (
+            <a key={p.sm.id} href={getDeepLink(p.sm, item.name)} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-between px-2 py-1 hover:bg-white/5 rounded text-xs gap-2">
+              <span>{p.sm.logo_emoji} {p.sm.name}</span>
+              <span className={i === 0 ? 'text-emerald-400 font-bold' : 'text-white/70'}>{p.price.toFixed(2)}€</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // PANEL DE COMPARACIÓN DE PRECIOS
 function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
   if (!show) return null
@@ -373,6 +405,9 @@ function App() {
   const [currentList, setCurrentList] = useState(null)
   const [items, setItems] = useState([])
   const [newItemName, setNewItemName] = useState('')
+  const [productSuggestions, setProductSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
   const [accessCode, setAccessCode] = useState('')
   const [newListName, setNewListName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -390,6 +425,7 @@ function App() {
   const [showPriceComparison, setShowPriceComparison] = useState(false)
   const [supermarkets, setSupermarkets] = useState([])
   const [priceEstimates, setPriceEstimates] = useState({})
+  const [itemPrices, setItemPrices] = useState({}) // {itemId: {supermarketId: price}}
 
   // Estados para modo compra
   const [shoppingMode, setShoppingMode] = useState(false)
@@ -637,6 +673,84 @@ function App() {
   }
 
   // ==========================================
+  // OPEN FOOD FACTS & GEOLOCALIZACIÓN
+  // ==========================================
+
+  const searchOpenFoodFacts = async (query) => {
+    if (!query || query.length < 3) return []
+    try {
+      const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&json=1&page_size=5&fields=product_name,categories_tags,brands,image_url`)
+      const data = await res.json()
+      return data.products?.map(p => ({
+        name: p.product_name || '',
+        brand: p.brands || '',
+        category: p.categories_tags?.[0]?.replace('en:', '') || '',
+        image: p.image_url
+      })) || []
+    } catch { return [] }
+  }
+
+  const searchProductSuggestions = useCallback(async (query) => {
+    if (!query || query.length < 3) { setProductSuggestions([]); setShowSuggestions(false); return }
+    setLoadingSuggestions(true)
+    const results = await searchOpenFoodFacts(query)
+    setProductSuggestions(results)
+    setShowSuggestions(results.length > 0)
+    setLoadingSuggestions(false)
+  }, [])
+
+  const selectSuggestion = (suggestion) => {
+    const fullName = suggestion.brand ? `${suggestion.brand} ${suggestion.name}` : suggestion.name
+    setNewItemName(fullName)
+    setShowSuggestions(false)
+    setProductSuggestions([])
+  }
+
+  const getDeepLink = (supermarket, productName) => {
+    const query = encodeURIComponent(productName)
+    const links = {
+      'Mercadona': `https://www.mercadona.es/search/${query}`,
+      'Carrefour': `https://www.carrefour.es/supermercado/search?q=${query}`,
+      'Lidl': `https://www.lidl.es/es/search?q=${query}`,
+      'Aldi': `https://www.aldi.es/busqueda.html?text=${query}`,
+      'DIA': `https://www.dia.es/compra-online/search?q=${query}`,
+      'Alcampo': `https://www.alcampo.es/compra-online/search/?q=${query}`,
+      'Amazon Fresh': `https://www.amazon.es/s?k=${query}&i=amazonfresh`
+    }
+    return links[supermarket.name] || `https://www.google.com/search?q=${query}+${supermarket.name}`
+  }
+
+  const getNearbySupermárkets = async () => {
+    if (!navigator.geolocation) return supermarkets
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+          // Coordenadas aproximadas de supermercados en España (ejemplo Madrid)
+          const locations = {
+            'Mercadona': { lat: 40.4168, lng: -3.7038 },
+            'Carrefour': { lat: 40.4200, lng: -3.7000 },
+            'Lidl': { lat: 40.4150, lng: -3.7050 },
+            'Aldi': { lat: 40.4180, lng: -3.7020 },
+            'DIA': { lat: 40.4160, lng: -3.7040 },
+            'Alcampo': { lat: 40.4190, lng: -3.7010 },
+            'Amazon Fresh': { lat: 40.4170, lng: -3.7030 }
+          }
+          const withDistance = supermarkets.map(sm => ({
+            ...sm,
+            distance: Math.sqrt(
+              Math.pow(coords.lat - (locations[sm.name]?.lat || 40.4168), 2) +
+              Math.pow(coords.lng - (locations[sm.name]?.lng || -3.7038), 2)
+            )
+          }))
+          resolve(withDistance.sort((a, b) => a.distance - b.distance))
+        },
+        () => resolve(supermarkets)
+      )
+    })
+  }
+
+  // ==========================================
   // FUNCIONES PARA COMPARADOR DE PRECIOS
   // ==========================================
 
@@ -671,10 +785,13 @@ function App() {
 
     setIsLoading(true)
 
+    // Ordenar supermercados por proximidad
+    const nearbySupermarkets = await getNearbySupermárkets()
+
     // Calcular total para cada supermercado
     const comparisons = []
 
-    for (const supermarket of supermarkets) {
+    for (const supermarket of nearbySupermarkets) {
       let total = 0
       const pendingItems = items.filter(i => !i.completed)
 
@@ -973,6 +1090,11 @@ function App() {
   }, [window.location.pathname])
 
   useEffect(() => {
+    const timer = setTimeout(() => { if (newItemName) searchProductSuggestions(newItemName) }, 500)
+    return () => clearTimeout(timer)
+  }, [newItemName, searchProductSuggestions])
+
+  useEffect(() => {
     if (!currentList) return
     const fetchItems = async () => {
       const { data } = await supabase.from('shopping_items').select('*').eq('list_id', currentList.id).order('created_at', { ascending: false })
@@ -1136,12 +1258,29 @@ function App() {
                 </div>
               </div>
 
-              <form onSubmit={addItem} className="flex gap-2">
-                <input ref={inputRef} type="text" placeholder="Añadir producto..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-white/30" />
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
-                  className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
-              </form>
+              <div className="relative">
+                <form onSubmit={addItem} className="flex gap-2">
+                  <input ref={inputRef} type="text" placeholder="Añadir producto..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
+                    onFocus={() => productSuggestions.length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-white/30" />
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
+                    className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
+                </form>
+                {showSuggestions && productSuggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-14 mt-2 bg-[#12121a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto">
+                    {productSuggestions.map((sug, i) => (
+                      <button key={i} onClick={() => selectSuggestion(sug)} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 text-left">
+                        {sug.image && <img src={sug.image} alt="" className="w-10 h-10 rounded object-cover" />}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{sug.brand && <span className="text-emerald-400">{sug.brand}</span>} {sug.name}</div>
+                          {sug.category && <div className="text-xs text-white/40 truncate">{sug.category}</div>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="flex items-center gap-2 mt-4">
                 <div className="flex bg-white/5 rounded-xl p-1">
@@ -1190,6 +1329,7 @@ function App() {
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           )}
+                          {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
                         </div>
                         {formatQuantity(item.quantity, item.unit) && <span className="text-sm text-white/40">{formatQuantity(item.quantity, item.unit)}</span>}
                       </div>
@@ -1232,6 +1372,7 @@ function App() {
                                   <ExternalLink className="w-4 h-4" />
                                 </a>
                               )}
+                              {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
                             </div>
                             {formatQuantity(item.quantity, item.unit) && <span className="text-sm text-white/50">{formatQuantity(item.quantity, item.unit)}</span>}
                           </div>
