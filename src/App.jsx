@@ -86,7 +86,7 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
 const UNITS = ['unidad', 'kg', 'g', 'L', 'ml', 'docena', 'paquete', 'lata', 'botella', 'bolsa', 'bote', 'tarrina', 'bandeja', 'manojo', 'racimo']
 
 // MODAL DE EDICIÓN
-function EditModal({ item, onSave, onClose, supermarkets = [] }) {
+function EditModal({ item, onSave, onClose, supermarkets = [], theme = {} }) {
   const [name, setName] = useState(item.name)
   const [quantity, setQuantity] = useState(item.quantity || 1)
   const [unit, setUnit] = useState(item.unit || 'unidad')
@@ -96,13 +96,15 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
   const [prices, setPrices] = useState({})
   const [isLoading, setIsLoading] = useState(false)
 
+  const { bgCard = 'bg-white', bgInput = 'bg-gray-100', text = 'text-gray-900', textMuted = 'text-gray-500', border = 'border-gray-200', bgHover = 'hover:bg-gray-200' } = theme
+
   const handleSave = async () => {
     setIsLoading(true)
     await onSave({ ...item, name, quantity, unit, category, product_url: productUrl, prices })
     setIsLoading(false)
     onClose()
   }
-  
+
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -111,57 +113,57 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-3xl p-6 w-full max-w-md border border-gray-200 shadow-2xl"
+        className={`${bgCard} rounded-3xl p-6 w-full max-w-md border ${border} shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold flex items-center gap-2">
+          <h2 className={`text-xl font-bold flex items-center gap-2 ${text}`}>
             <Edit3 className="w-5 h-5 text-emerald-400" />Editar producto
           </h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"><X className="w-4 h-4" /></button>
+          <button onClick={onClose} className={`w-8 h-8 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><X className="w-4 h-4" /></button>
         </div>
         
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">Nombre</label>
+            <label className={`text-sm ${textMuted} mb-1 block`}>Nombre</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50" />
+              className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 ${text}`} />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm text-gray-500 mb-1 block">Cantidad</label>
+              <label className={`text-sm ${textMuted} mb-1 block`}>Cantidad</label>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => setQuantity(Math.max(0.5, quantity - (quantity <= 1 ? 0.5 : 1)))}
-                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-gray-300 text-lg font-bold text-gray-700">-</button>
+                  className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} text-lg font-bold ${text}`}>-</button>
                 <input type="number" value={quantity} onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
-                  step="0.5" min="0.5" className="flex-1 px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-center focus:outline-none" />
+                  step="0.5" min="0.5" className={`flex-1 px-3 py-2 ${bgInput} border ${border} rounded-xl text-center focus:outline-none ${text}`} />
                 <button type="button" onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-gray-300 text-lg font-bold text-gray-700">+</button>
+                  className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} text-lg font-bold ${text}`}>+</button>
               </div>
             </div>
             <div>
-              <label className="text-sm text-gray-500 mb-1 block">Unidad</label>
+              <label className={`text-sm ${textMuted} mb-1 block`}>Unidad</label>
               <select value={unit} onChange={(e) => setUnit(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none appearance-none cursor-pointer">
-                {UNITS.map(u => <option key={u} value={u} className="bg-white">{u}</option>)}
+                className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none appearance-none cursor-pointer ${text}`}>
+                {UNITS.map(u => <option key={u} value={u} className={bgCard}>{u}</option>)}
               </select>
             </div>
           </div>
-          
+
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">Categoría</label>
+            <label className={`text-sm ${textMuted} mb-1 block`}>Categoría</label>
             <select value={category} onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none appearance-none cursor-pointer">
-              {ALL_CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-white">{CATEGORY_ICONS[cat]} {cat}</option>)}
+              className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none appearance-none cursor-pointer ${text}`}>
+              {ALL_CATEGORIES.map(cat => <option key={cat} value={cat} className={bgCard}>{CATEGORY_ICONS[cat]} {cat}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="text-sm text-gray-500 mb-1 block">URL del producto (opcional)</label>
+            <label className={`text-sm ${textMuted} mb-1 block`}>URL del producto (opcional)</label>
             <input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 text-sm" />
+              className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 text-sm ${text}`} />
           </div>
 
           {supermarkets.length > 0 && (
@@ -169,9 +171,9 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
               <button
                 type="button"
                 onClick={() => setShowPrices(!showPrices)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 rounded-2xl hover:bg-gray-200"
+                className={`w-full flex items-center justify-between px-4 py-3 ${bgInput} rounded-2xl ${bgHover}`}
               >
-                <span className="text-sm text-gray-600">💰 Precios por supermercado (opcional)</span>
+                <span className={`text-sm ${text}`}>💰 Precios por supermercado (opcional)</span>
                 <span className="text-xs">{showPrices ? '▼' : '▶'}</span>
               </button>
               {showPrices && (
@@ -179,7 +181,7 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
                   {supermarkets.map(sm => (
                     <div key={sm.id} className="flex items-center gap-2">
                       <span className="text-lg">{sm.logo_emoji}</span>
-                      <span className="text-xs text-gray-500 flex-1">{sm.name}</span>
+                      <span className={`text-xs ${textMuted} flex-1`}>{sm.name}</span>
                       <input
                         type="number"
                         step="0.01"
@@ -187,7 +189,7 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
                         placeholder="€"
                         value={prices[sm.id] || ''}
                         onChange={(e) => setPrices({ ...prices, [sm.id]: e.target.value })}
-                        className="w-20 px-2 py-1 bg-gray-100 border border-gray-200 rounded-lg text-sm text-right focus:outline-none focus:border-emerald-500/50"
+                        className={`w-20 px-2 py-1 ${bgInput} border ${border} rounded-lg text-sm text-right focus:outline-none focus:border-emerald-500/50 ${text}`}
                       />
                     </div>
                   ))}
@@ -196,9 +198,9 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
             </div>
           )}
         </div>
-        
+
         <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="flex-1 py-3 px-6 bg-gray-100 rounded-2xl font-medium hover:bg-gray-200">Cancelar</button>
+          <button onClick={onClose} className={`flex-1 py-3 px-6 ${bgInput} rounded-2xl font-medium ${bgHover} ${text}`}>Cancelar</button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleSave}
             disabled={isLoading || !name.trim()} className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-600 to-lime-600 text-white rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" />Guardar</>}
@@ -1209,26 +1211,26 @@ function App() {
             <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4">
               <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 bg-clip-text text-transparent">ListaCompra</span>
             </h1>
-            <p className="text-lg text-gray-500">Listas compartidas en tiempo real</p>
+            <p className={`text-lg ${textMuted}`}>Listas compartidas en tiempo real</p>
           </motion.div>
 
           <div className="w-full max-w-md space-y-6">
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-gray-100 backdrop-blur-xl rounded-3xl p-6 border border-gray-200">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-400" />Crear nueva lista</h2>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`${bgCard} backdrop-blur-xl rounded-3xl p-6 border ${border}`}>
+              <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Sparkles className="w-5 h-5 text-emerald-400" />Crear nueva lista</h2>
               <input type="text" placeholder="Nombre de la lista" value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && createList()}
-                className="w-full px-4 py-3 mb-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-gray-400" />
+                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:${textMuted} ${text}`} />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={createList} disabled={isLoading}
                 className="w-full py-3 bg-gradient-to-r from-emerald-600 to-lime-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" />Crear lista</>}
               </motion.button>
             </motion.div>
 
-            <div className="flex items-center gap-4"><div className="flex-1 h-px bg-gray-200" /><span className="text-gray-400 text-sm">o</span><div className="flex-1 h-px bg-gray-200" /></div>
+            <div className="flex items-center gap-4"><div className={`flex-1 h-px ${border}`} /><span className={`${textMuted} text-sm`}>o</span><div className={`flex-1 h-px ${border}`} /></div>
 
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-gray-100 backdrop-blur-xl rounded-3xl p-6 border border-gray-200">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Share2 className="w-5 h-5 text-emerald-400" />Unirse a lista</h2>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`${bgCard} backdrop-blur-xl rounded-3xl p-6 border ${border}`}>
+              <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Share2 className="w-5 h-5 text-emerald-400" />Unirse a lista</h2>
               <input type="text" placeholder="Código (6 caracteres)" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())} onKeyPress={(e) => e.key === 'Enter' && joinList()} maxLength={6}
-                className="w-full px-4 py-3 mb-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none uppercase tracking-widest text-center text-xl font-mono placeholder:text-gray-400" />
+                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none uppercase tracking-widest text-center text-xl font-mono placeholder:${textMuted} ${text}`} />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={joinList} disabled={isLoading || accessCode.length !== 6}
                 className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ArrowRight className="w-5 h-5" />Unirse</>}
@@ -1245,20 +1247,20 @@ function App() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => { navigate('/'); setCurrentList(null); setItems([]) }}
-                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"><Home className="w-5 h-5" /></motion.button>
+                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><Home className="w-5 h-5" /></motion.button>
                   <div>
-                    <h1 className="text-xl font-bold">{currentList.name}</h1>
-                    {activeUsers > 1 && <div className="flex items-center gap-1 text-sm text-gray-500"><span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />{activeUsers} online</div>}
+                    <h1 className={`text-xl font-bold ${text}`}>{currentList.name}</h1>
+                    {activeUsers > 1 && <div className={`flex items-center gap-1 text-sm ${textMuted}`}><span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />{activeUsers} online</div>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={copyCode}
-                    className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl text-sm hover:bg-gray-200">
+                    className={`flex items-center gap-2 px-3 py-2 ${bgInput} rounded-xl text-sm ${bgHover} ${text}`}>
                     {copiedCode ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span className="font-mono tracking-wider">{currentList.access_code}</span>
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { loadPriceComparison(); setShowPriceComparison(true); }}
-                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200" title="Comparar precios">
+                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title="Comparar precios">
                     <TrendingDown className="w-5 h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
@@ -1266,30 +1268,30 @@ function App() {
                     <Share2 className="w-5 h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
-                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200" title="Favoritos">
+                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title="Favoritos">
                     <Star className="w-5 h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleTheme}
-                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200" title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}>
+                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`} title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}>
                     {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={loadStats}
-                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"><BarChart3 className="w-5 h-5" /></motion.button>
+                    className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><BarChart3 className="w-5 h-5" /></motion.button>
                 </div>
               </div>
 
               {/* Toggle modo compra */}
               <div className="flex items-center gap-2 mb-4">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={toggleShoppingMode}
-                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}>
+                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white' : `${bgInput} ${bgHover} ${text}`}`}>
                   {shoppingMode ? <Check className="w-4 h-4" /> : <ShoppingBasket className="w-4 h-4" />}
                   {shoppingMode ? 'Modo Compra Activo' : 'Activar Modo Compra'}
                 </motion.button>
               </div>
 
               <div className="mb-4">
-                <div className="flex justify-between text-sm mb-2"><span className="text-gray-500">{pendingItems} pendientes</span><span className="text-emerald-400">{completedCount} completados</span></div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="flex justify-between text-sm mb-2"><span className={textMuted}>{pendingItems} pendientes</span><span className="text-emerald-400">{completedCount} completados</span></div>
+                <div className={`h-2 ${bgInput} rounded-full overflow-hidden`}>
                   <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" />
                 </div>
               </div>
@@ -1299,18 +1301,18 @@ function App() {
                   <input ref={inputRef} type="text" placeholder="Añadir producto..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
                     onFocus={() => productSuggestions.length > 0 && setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-gray-400" />
+                    className={`flex-1 px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 ${text} placeholder:${textMuted}`} />
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
                     className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 text-white flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
                 </form>
                 {showSuggestions && productSuggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-14 mt-2 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto">
+                  <div className={`absolute top-full left-0 right-14 mt-2 ${bgCard} border ${border} rounded-2xl overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto`}>
                     {productSuggestions.map((sug, i) => (
-                      <button key={i} onClick={() => selectSuggestion(sug)} className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-100 text-left">
+                      <button key={i} onClick={() => selectSuggestion(sug)} className={`w-full px-4 py-3 flex items-center gap-3 ${bgHover} text-left ${text}`}>
                         {sug.image && <img src={sug.image} alt="" className="w-10 h-10 rounded object-cover" />}
                         <div className="flex-1 min-w-0">
                           <div className="font-medium truncate">{sug.brand && <span className="text-emerald-400">{sug.brand}</span>} {sug.name}</div>
-                          {sug.category && <div className="text-xs text-gray-500 truncate">{sug.category}</div>}
+                          {sug.category && <div className={`text-xs ${textMuted} truncate`}>{sug.category}</div>}
                         </div>
                       </button>
                     ))}
@@ -1319,18 +1321,18 @@ function App() {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <div className="flex bg-gray-100 rounded-xl p-1">
-                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-emerald-500 text-white' : 'text-gray-500'}`}>
+                <div className={`flex ${bgInput} rounded-xl p-1`}>
+                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-emerald-500 text-white' : textMuted}`}>
                     <List className="w-4 h-4" /><span className="hidden sm:inline">Lista</span>
                   </button>
-                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-emerald-500 text-white' : 'text-gray-500'}`}>
+                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-emerald-500 text-white' : textMuted}`}>
                     <LayoutGrid className="w-4 h-4" /><span className="hidden sm:inline">Categorías</span>
                   </button>
                 </div>
                 <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap ${filterCategory === 'all' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'}`}>Todos</button>
+                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap ${filterCategory === 'all' ? 'bg-emerald-500 text-white' : `${bgInput} ${text}`}`}>Todos</button>
                   {activeCategories.map(cat => (
-                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 ${filterCategory === cat ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 ${filterCategory === cat ? 'bg-emerald-500 text-white' : `${bgInput} ${text}`}`}>
                       <span>{CATEGORY_ICONS[cat]}</span><span className="hidden sm:inline">{cat}</span>
                     </button>
                   ))}
@@ -1342,23 +1344,23 @@ function App() {
           <main className="max-w-2xl mx-auto px-4 py-6 pb-24">
             {filteredItems.length === 0 ? (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
-                <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-4"><Package className="w-10 h-10 text-gray-300" /></div>
-                <h3 className="text-xl font-semibold mb-2">Lista vacía</h3><p className="text-gray-500">Añade tu primer producto</p>
+                <div className={`w-20 h-20 rounded-3xl ${bgInput} flex items-center justify-center mx-auto mb-4`}><Package className={`w-10 h-10 ${textMuted}`} /></div>
+                <h3 className={`text-xl font-semibold mb-2 ${text}`}>Lista vacía</h3><p className={textMuted}>Añade tu primer producto</p>
               </motion.div>
             ) : viewMode === 'compact' ? (
               <div className="space-y-2">
                 <AnimatePresence>
                   {sortedItems.map((item) => (
                     <motion.div key={item.id} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20, scale: 0.9 }}
-                      className={`group flex items-center gap-3 p-3 rounded-xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-gray-100 border-gray-200 hover:bg-gray-200'}`}>
+                      className={`group flex items-center gap-3 p-3 rounded-xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : `${bgInput} ${border} ${bgHover}`}`}>
                       <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleComplete(item)}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${item.completed ? 'bg-emerald-500 text-white' : 'bg-gray-200'}`}>
-                        {item.completed ? <Check className="w-4 h-4" /> : <Circle className="w-4 h-4 text-gray-400" />}
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput}`}`}>
+                        {item.completed ? <Check className="w-4 h-4" /> : <Circle className={`w-4 h-4 ${textMuted}`} />}
                       </motion.button>
                       <span className="text-lg">{CATEGORY_ICONS[item.category]}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className={`font-medium ${item.completed ? 'line-through text-gray-500' : ''}`}>{item.name}</span>
+                          <span className={`font-medium ${item.completed ? `line-through ${textMuted}` : text}`}>{item.name}</span>
                           {item.product_url && (
                             <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                               className="text-emerald-400 hover:text-emerald-300 flex-shrink-0">
@@ -1367,19 +1369,19 @@ function App() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          {formatQuantity(item.quantity, item.unit) && <span className="text-xs text-gray-500">{formatQuantity(item.quantity, item.unit)}</span>}
+                          {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
                           {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100">
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleFavorite(item)}
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : 'bg-gray-100 hover:bg-yellow-500/20'}`}>
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : `${bgInput} hover:bg-yellow-500/20`}`}>
                           <Star className={`w-3.5 h-3.5 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
                         </motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setEditingItem(item)}
-                          className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-emerald-500/20 hover:text-emerald-400"><Edit3 className="w-3.5 h-3.5" /></motion.button>
+                          className={`w-7 h-7 rounded-lg ${bgInput} flex items-center justify-center hover:bg-emerald-500/20 hover:text-emerald-400 ${text}`}><Edit3 className="w-3.5 h-3.5" /></motion.button>
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => deleteItem(item.id)}
-                          className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-red-500/20 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></motion.button>
+                          className={`w-7 h-7 rounded-lg ${bgInput} flex items-center justify-center hover:bg-red-500/20 hover:text-red-400 ${text}`}><Trash2 className="w-3.5 h-3.5" /></motion.button>
                       </div>
                     </motion.div>
                   ))}
@@ -1391,19 +1393,19 @@ function App() {
                   <motion.div key={category} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-2xl">{CATEGORY_ICONS[category]}</span>
-                      <h2 className="text-lg font-semibold">{category}</h2>
-                      <span className="text-gray-400 text-sm">({categoryItems.length})</span>
+                      <h2 className={`text-lg font-semibold ${text}`}>{category}</h2>
+                      <span className={`${textMuted} text-sm`}>({categoryItems.length})</span>
                     </div>
                     <div className="space-y-2">
                       {categoryItems.map((item) => (
-                        <motion.div key={item.id} layout className={`group flex items-center gap-3 p-4 rounded-2xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-gray-100 border-gray-200 hover:bg-gray-200'}`}>
+                        <motion.div key={item.id} layout className={`group flex items-center gap-3 p-4 rounded-2xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : `${bgInput} ${border} ${bgHover}`}`}>
                           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleComplete(item)}
-                            className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.completed ? 'bg-emerald-500 text-white' : 'bg-gray-200'}`}>
-                            {item.completed ? <Check className="w-5 h-5" /> : <Circle className="w-5 h-5 text-gray-400" />}
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput}`}`}>
+                            {item.completed ? <Check className="w-5 h-5" /> : <Circle className={`w-5 h-5 ${textMuted}`} />}
                           </motion.button>
                           <div className="flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className={`font-medium ${item.completed ? 'line-through text-gray-500' : ''}`}>{item.name}</span>
+                              <span className={`font-medium ${item.completed ? `line-through ${textMuted}` : text}`}>{item.name}</span>
                               {item.product_url && (
                                 <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
                                   className="text-emerald-400 hover:text-emerald-300 flex-shrink-0">
@@ -1412,16 +1414,16 @@ function App() {
                               )}
                             </div>
                             <div className="flex items-center gap-2 mt-1">
-                              {formatQuantity(item.quantity, item.unit) && <span className="text-xs text-gray-500">{formatQuantity(item.quantity, item.unit)}</span>}
+                              {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
                               {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
                             </div>
                           </div>
                           <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100">
-                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => toggleFavorite(item)} className={`w-8 h-8 rounded-xl flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : 'bg-gray-100 hover:bg-yellow-500/20'}`}>
+                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => toggleFavorite(item)} className={`w-8 h-8 rounded-xl flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : `${bgInput} hover:bg-yellow-500/20`}`}>
                               <Star className={`w-4 h-4 ${isFavorite(item.name) ? 'fill-yellow-400' : ''}`} />
                             </motion.button>
-                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditingItem(item)} className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-emerald-500/20"><Edit3 className="w-4 h-4" /></motion.button>
-                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteItem(item.id)} className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-red-500/20"><Trash2 className="w-4 h-4" /></motion.button>
+                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => setEditingItem(item)} className={`w-8 h-8 rounded-xl ${bgInput} flex items-center justify-center hover:bg-emerald-500/20 ${text}`}><Edit3 className="w-4 h-4" /></motion.button>
+                            <motion.button whileHover={{ scale: 1.1 }} onClick={() => deleteItem(item.id)} className={`w-8 h-8 rounded-xl ${bgInput} flex items-center justify-center hover:bg-red-500/20 ${text}`}><Trash2 className="w-4 h-4" /></motion.button>
                           </div>
                         </motion.div>
                       ))}
@@ -1544,7 +1546,7 @@ function App() {
           searchTerm={favoriteSearchTerm}
           setSearchTerm={setFavoriteSearchTerm}
         />
-        {editingItem && <EditModal item={editingItem} supermarkets={supermarkets} onSave={updateItem} onClose={() => setEditingItem(null)} />}
+        {editingItem && <EditModal item={editingItem} supermarkets={supermarkets} onSave={updateItem} onClose={() => setEditingItem(null)} theme={{ bgCard, bgInput, text, textMuted, border, bgHover }} />}
       </AnimatePresence>
     </div>
   )
