@@ -133,11 +133,11 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
               <label className="text-sm text-gray-500 mb-1 block">Cantidad</label>
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => setQuantity(Math.max(0.5, quantity - (quantity <= 1 ? 0.5 : 1)))}
-                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-white/20 text-lg font-bold">-</button>
+                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-gray-300 text-lg font-bold text-gray-700">-</button>
                 <input type="number" value={quantity} onChange={(e) => setQuantity(parseFloat(e.target.value) || 1)}
                   step="0.5" min="0.5" className="flex-1 px-3 py-2 bg-gray-100 border border-gray-200 rounded-xl text-center focus:outline-none" />
                 <button type="button" onClick={() => setQuantity(quantity + 1)}
-                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-white/20 text-lg font-bold">+</button>
+                  className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center hover:bg-gray-300 text-lg font-bold text-gray-700">+</button>
               </div>
             </div>
             <div>
@@ -200,7 +200,7 @@ function EditModal({ item, onSave, onClose, supermarkets = [] }) {
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 py-3 px-6 bg-gray-100 rounded-2xl font-medium hover:bg-gray-200">Cancelar</button>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleSave}
-            disabled={isLoading || !name.trim()} className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-600 to-lime-600 rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
+            disabled={isLoading || !name.trim()} className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-600 to-lime-600 text-white rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50">
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" />Guardar</>}
           </motion.button>
         </div>
@@ -222,7 +222,7 @@ function InlinePriceComparator({ item, supermarkets, priceEstimates, getDeepLink
 
   return (
     <div className="relative">
-      <button onClick={() => setShow(!show)} className="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg hover:bg-emerald-500/20 flex items-center gap-1">
+      <button onClick={() => setShow(!show)} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 flex items-center gap-1">
         <TrendingDown className="w-3 h-3" />
         <span>{cheapest.sm.logo_emoji} {cheapest.price.toFixed(2)}€</span>
       </button>
@@ -232,7 +232,7 @@ function InlinePriceComparator({ item, supermarkets, priceEstimates, getDeepLink
             <a key={p.sm.id} href={getDeepLink(p.sm, item.name)} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-between px-2 py-1 hover:bg-gray-100 rounded text-xs gap-2">
               <span>{p.sm.logo_emoji} {p.sm.name}</span>
-              <span className={i === 0 ? 'text-emerald-400 font-bold' : 'text-gray-600'}>{p.price.toFixed(2)}€</span>
+              <span className={i === 0 ? 'text-emerald-700 font-bold' : 'text-gray-600'}>{p.price.toFixed(2)}€</span>
             </a>
           ))}
         </div>
@@ -311,7 +311,7 @@ function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
 
         <div className="p-6 border-t border-gray-200">
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onShare}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 font-semibold flex items-center justify-center gap-2">
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold flex items-center justify-center gap-2">
             <Share2 className="w-5 h-5" />
             Compartir con precios
           </motion.button>
@@ -377,7 +377,7 @@ function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchT
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-xs text-gray-500">Usado {fav.use_count} {fav.use_count === 1 ? 'vez' : 'veces'}</span>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onAdd(fav)}
-                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-lime-600 text-sm font-semibold flex items-center gap-1">
+                      className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-lime-600 text-white text-sm font-semibold flex items-center gap-1">
                       <Plus className="w-4 h-4" />
                       Añadir
                     </motion.button>
@@ -765,7 +765,6 @@ function App() {
     const { data, error } = await supabase
       .from('supermarkets')
       .select('*')
-      .eq('is_active', true)
       .order('display_order')
 
     if (data && !error) {
@@ -1159,7 +1158,7 @@ function App() {
   const progress = totalItems > 0 ? (completedCount / totalItems) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gray-50 text-white overflow-hidden">
+    <div className="min-h-screen bg-gray-50 text-gray-900 overflow-hidden">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -1169,7 +1168,7 @@ function App() {
       <AnimatePresence>
         {notification && (
           <motion.div initial={{ opacity: 0, y: -50, x: '-50%' }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }}
-            className={`fixed top-4 left-1/2 z-50 px-6 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl ${notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-200' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-200'}`}>
+            className={`fixed top-4 left-1/2 z-50 px-6 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl ${notification.type === 'error' ? 'bg-red-100 border-red-300 text-red-700' : 'bg-emerald-100 border-emerald-300 text-emerald-700'}`}>
             <div className="flex items-center gap-2">{notification.type === 'error' ? <X className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}{notification.message}</div>
           </motion.div>
         )}
@@ -1179,10 +1178,10 @@ function App() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen flex flex-col items-center justify-center p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-lime-600 mb-6 shadow-2xl shadow-emerald-500/30">
-              <ShoppingCart className="w-12 h-12" />
+              <ShoppingCart className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-white via-emerald-200 to-lime-200 bg-clip-text text-transparent">ListaCompra</span>
+              <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 bg-clip-text text-transparent">ListaCompra</span>
             </h1>
             <p className="text-lg text-gray-500">Listas compartidas en tiempo real</p>
           </motion.div>
@@ -1193,19 +1192,19 @@ function App() {
               <input type="text" placeholder="Nombre de la lista" value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && createList()}
                 className="w-full px-4 py-3 mb-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-gray-400" />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={createList} disabled={isLoading}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-lime-600 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-lime-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" />Crear lista</>}
               </motion.button>
             </motion.div>
 
-            <div className="flex items-center gap-4"><div className="flex-1 h-px bg-white/20" /><span className="text-gray-400 text-sm">o</span><div className="flex-1 h-px bg-white/20" /></div>
+            <div className="flex items-center gap-4"><div className="flex-1 h-px bg-gray-200" /><span className="text-gray-400 text-sm">o</span><div className="flex-1 h-px bg-gray-200" /></div>
 
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-gray-100 backdrop-blur-xl rounded-3xl p-6 border border-gray-200">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2"><Share2 className="w-5 h-5 text-emerald-400" />Unirse a lista</h2>
               <input type="text" placeholder="Código (6 caracteres)" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())} onKeyPress={(e) => e.key === 'Enter' && joinList()} maxLength={6}
                 className="w-full px-4 py-3 mb-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none uppercase tracking-widest text-center text-xl font-mono placeholder:text-gray-400" />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={joinList} disabled={isLoading || accessCode.length !== 6}
-                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
+                className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ArrowRight className="w-5 h-5" />Unirse</>}
               </motion.button>
             </motion.div>
@@ -1215,7 +1214,7 @@ function App() {
 
       {view === 'list' && currentList && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen">
-          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-white/5">
+          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-gray-200">
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -1237,7 +1236,7 @@ function App() {
                     <TrendingDown className="w-5 h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 flex items-center justify-center" title="Compartir por WhatsApp">
+                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white flex items-center justify-center" title="Compartir por WhatsApp">
                     <Share2 className="w-5 h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
@@ -1252,7 +1251,7 @@ function App() {
               {/* Toggle modo compra */}
               <div className="flex items-center gap-2 mb-4">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={toggleShoppingMode}
-                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600' : 'bg-gray-100 hover:bg-gray-200'}`}>
+                  className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}>
                   {shoppingMode ? <Check className="w-4 h-4" /> : <ShoppingBasket className="w-4 h-4" />}
                   {shoppingMode ? 'Modo Compra Activo' : 'Activar Modo Compra'}
                 </motion.button>
@@ -1272,7 +1271,7 @@ function App() {
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-gray-400" />
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
-                    className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
+                    className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 text-white flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
                 </form>
                 {showSuggestions && productSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-14 mt-2 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto">
@@ -1291,17 +1290,17 @@ function App() {
 
               <div className="flex items-center gap-2 mt-4">
                 <div className="flex bg-gray-100 rounded-xl p-1">
-                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-gray-200 text-white' : 'text-gray-500'}`}>
+                  <button onClick={() => setViewMode('compact')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'compact' ? 'bg-emerald-500 text-white' : 'text-gray-500'}`}>
                     <List className="w-4 h-4" /><span className="hidden sm:inline">Lista</span>
                   </button>
-                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-gray-200 text-white' : 'text-gray-500'}`}>
+                  <button onClick={() => setViewMode('category')} className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 ${viewMode === 'category' ? 'bg-emerald-500 text-white' : 'text-gray-500'}`}>
                     <LayoutGrid className="w-4 h-4" /><span className="hidden sm:inline">Categorías</span>
                   </button>
                 </div>
                 <div className="flex-1 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap ${filterCategory === 'all' ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>Todos</button>
+                  <button onClick={() => setFilterCategory('all')} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap ${filterCategory === 'all' ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'}`}>Todos</button>
                   {activeCategories.map(cat => (
-                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 ${filterCategory === cat ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                    <button key={cat} onClick={() => setFilterCategory(cat)} className={`px-3 py-1.5 rounded-xl text-sm whitespace-nowrap flex items-center gap-1 ${filterCategory === cat ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
                       <span>{CATEGORY_ICONS[cat]}</span><span className="hidden sm:inline">{cat}</span>
                     </button>
                   ))}
@@ -1313,7 +1312,7 @@ function App() {
           <main className="max-w-2xl mx-auto px-4 py-6 pb-24">
             {filteredItems.length === 0 ? (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
-                <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-4"><Package className="w-10 h-10 text-white/20" /></div>
+                <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mx-auto mb-4"><Package className="w-10 h-10 text-gray-300" /></div>
                 <h3 className="text-xl font-semibold mb-2">Lista vacía</h3><p className="text-gray-500">Añade tu primer producto</p>
               </motion.div>
             ) : viewMode === 'compact' ? (
@@ -1418,7 +1417,7 @@ function App() {
 
       {view === 'stats' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen">
-          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-white/5">
+          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-gray-200">
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center gap-3">
                 <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setView('list')}
@@ -1486,7 +1485,7 @@ function App() {
                       return (
                         <div key={day} className="flex flex-col items-center gap-2 flex-1">
                           <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(height, 5)}%` }}
-                            className={`w-8 rounded-t-lg ${i === new Date().getDay() ? 'bg-gradient-to-t from-cyan-500 to-cyan-400' : 'bg-white/20'}`} />
+                            className={`w-8 rounded-t-lg ${i === new Date().getDay() ? 'bg-gradient-to-t from-cyan-500 to-cyan-400' : 'bg-gray-200'}`} />
                           <span className="text-xs text-gray-500">{day}</span>
                         </div>
                       )
