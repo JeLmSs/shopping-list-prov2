@@ -8,7 +8,7 @@ import {
   Sparkles, X, Calendar,
   PieChart, ArrowRight, Loader2, CheckCircle2, Circle,
   ListChecks, Home, Edit3, Save, List, LayoutGrid,
-  TrendingDown, Euro, Star, ShoppingBasket, Search, ExternalLink
+  TrendingDown, Euro, Star, ShoppingBasket, Search, ExternalLink, Moon, Sun
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -434,6 +434,32 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false)
   const [favorites, setFavorites] = useState([])
   const [favoriteSearchTerm, setFavoriteSearchTerm] = useState('')
+
+  // Estado para tema (dark/light)
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    return saved || 'light'
+  })
+
+  // Guardar tema en localStorage
+  useEffect(() => {
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
+
+  // Clases de tema dinámicas
+  const isDark = theme === 'dark'
+  const bg = isDark ? 'bg-[#121212]' : 'bg-gray-50'
+  const bgCard = isDark ? 'bg-[#1e1e1e]' : 'bg-white'
+  const bgInput = isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'
+  const bgHover = isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-200'
+  const text = isDark ? 'text-[#e0e0e0]' : 'text-gray-900'
+  const textMuted = isDark ? 'text-[#a0a0a0]' : 'text-gray-500'
+  const border = isDark ? 'border-white/10' : 'border-gray-200'
+  const bgHeader = isDark ? 'bg-[#121212]/80' : 'bg-gray-50/80'
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type })
@@ -1158,7 +1184,7 @@ function App() {
   const progress = totalItems > 0 ? (completedCount / totalItems) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 overflow-hidden">
+    <div className={`min-h-screen ${bg} ${text} overflow-hidden transition-colors duration-300`}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-emerald-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -1214,7 +1240,7 @@ function App() {
 
       {view === 'list' && currentList && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen">
-          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-gray-200">
+          <header className={`sticky top-0 z-40 backdrop-blur-xl ${bgHeader} border-b ${border}`}>
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -1242,6 +1268,10 @@ function App() {
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
                     className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200" title="Favoritos">
                     <Star className="w-5 h-5" />
+                  </motion.button>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleTheme}
+                    className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200" title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}>
+                    {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={loadStats}
                     className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"><BarChart3 className="w-5 h-5" /></motion.button>
@@ -1417,7 +1447,7 @@ function App() {
 
       {view === 'stats' && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen">
-          <header className="sticky top-0 z-40 backdrop-blur-xl bg-gray-50/80 border-b border-gray-200">
+          <header className={`sticky top-0 z-40 backdrop-blur-xl ${bgHeader} border-b ${border}`}>
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center gap-3">
                 <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setView('list')}
