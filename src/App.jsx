@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
-  ShoppingCart, Plus, Trash2, Check, Share2, BarChart3,
-  Copy, Users, Package, Clock, TrendingUp,
+  Plus, Trash2, Check, Share2, BarChart3,
+  Copy, Package, TrendingUp,
   Sparkles, X, Calendar,
   PieChart, ArrowRight, Loader2, CheckCircle2, Circle,
   ListChecks, Home, Edit3, Save, List, LayoutGrid,
-  TrendingDown, Euro, Star, ShoppingBasket, Search, ExternalLink, Moon, Sun
+  Star, Search, Moon, Sun, Wand2, ClipboardList
 } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
@@ -16,7 +16,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// CATEGORÍAS MEJORADAS
+// CATEGORÍAS
 const CATEGORY_KEYWORDS = {
   'Frutas y Verduras': ['manzana','manzanas','plátano','plátanos','platano','platanos','banana','bananas','naranja','naranjas','mandarina','mandarinas','clementina','limón','limones','limon','lima','pomelo','fresa','fresas','fresón','frambuesa','frambuesas','mora','moras','arándano','arándanos','arandano','arandanos','cereza','cerezas','melocotón','melocotones','melocoton','nectarina','albaricoque','albaricoques','ciruela','ciruelas','uva','uvas','pera','peras','mango','mangos','piña','piñas','papaya','kiwi','kiwis','sandía','sandias','sandia','melón','melones','melon','aguacate','aguacates','coco','granada','higo','higos','dátil','dátiles','fruta','frutas','tomate','tomates','cherry','lechuga','lechugas','escarola','endivia','rúcula','rucula','canónigo','espinaca','espinacas','acelga','acelgas','kale','col','coles','repollo','lombarda','coliflor','brócoli','brocoli','cebolla','cebollas','cebolleta','cebollino','chalota','ajo','ajos','ajete','puerro','puerros','apio','zanahoria','zanahorias','nabo','rábano','rábanos','rabano','remolacha','patata','patatas','papa','papas','boniato','batata','calabaza','calabacín','calabacines','calabacin','berenjena','berenjenas','pimiento','pimientos','pepino','pepinos','pepinillo','judía verde','judías verdes','judia verde','judias verdes','guisante','guisantes','haba','habas','alcachofa','alcachofas','espárrago','espárragos','esparrago','esparragos','champiñón','champiñones','seta','setas','shiitake','portobello','maíz','maiz','jengibre','cúrcuma','curcuma','perejil','cilantro','albahaca','menta','hierbabuena','romero','tomillo','orégano','oregano','laurel','verdura','verduras','hortaliza','ensalada','vegetal','vegetales'],
   'Carnes': ['pollo','pollos','pechuga','pechugas','muslo','muslos','contramuslo','alita','alitas','ternera','vaca','buey','filete','filetes','entrecot','solomillo','chuletón','chuleton','bistec','cerdo','lomo','costilla','costillas','chuleta','chuletas','secreto','pluma','presa','panceta','tocino','bacon','beicon','lacón','codillo','cordero','lechal','cabrito','paletilla','pavo','conejo','pato','codorniz','hamburguesa','hamburguesas','burger','albóndiga','albóndigas','albondiga','carne picada','picada','jamón','jamon','jamón serrano','jamon serrano','jamón york','jamon york','chorizo','chorizos','salchichón','salchichon','fuet','longaniza','salchicha','salchichas','frankfurt','butifarra','morcilla','chistorra','sobrasada','mortadela','chopped','fiambre','embutido','paté','pate','foie','hígado','carne','carnes','carnicería','charcutería'],
@@ -30,32 +30,34 @@ const CATEGORY_KEYWORDS = {
   'Higiene Personal': ['champú','champu','shampoo','acondicionador','gel','gel ducha','gel baño','desodorante','deo','pasta dientes','dentífrico','cepillo dientes','hilo dental','enjuague bucal','colutorio','crema hidratante','crema corporal','crema facial','protector solar','maquinilla','cuchilla','espuma afeitar','aftershave','colonia','perfume','pañuelo','pañuelos','kleenex','papel higiénico','papel higienico','toallita','toallitas','compresa','compresas','tampón','tampones','pañal','pañales','bastoncillo','algodón','tirita','tiritas','esparadrapo','venda','gasa','alcohol','agua oxigenada','betadine','termómetro','mascarilla','higiene','farmacia'],
   'Snacks y Dulces': ['patatas fritas','chips','pringles','lays','ruffles','nachos','doritos','palomitas','popcorn','snack','snacks','aperitivo','picoteo','gusanitos','cheetos','corteza','torreznos','chocolatina','bombón','bombones','caramelo','caramelos','piruleta','chupachups','chicle','chicles','regaliz','gominola','gominolas','golosina','golosinas','haribo','chuches','chuchería','oreo','barrita','barritas','kit kat','twix','mars','snickers','kinder','lacasitos','filipinos','pastelito','bollycao','dulce','dulces'],
   'Mascotas': ['comida perro','pienso perro','comida gato','pienso gato','pienso','arena gato','arena','snack mascota','hueso perro','juguete mascota','collar','correa','champú mascota','antiparasitario','pipeta','comedero','bebedero','cama mascota','transportín','rascador','mascota','mascotas','perro','gato'],
+  'Viaje': ['maleta','mochila','pasaporte','cargador','adaptador','protector solar','gafas de sol','gafas','bañador','bikini','toalla','chanclas','sandalias','neceser','candado','almohada viaje','tapones oídos','antifaz','botiquín','tiritas','ibuprofeno','paracetamol','repelente','crema solar','desodorante viaje','cepillo viaje','mini champú','ropa interior','calcetines','camiseta','pantalón','chaqueta','impermeable','paraguas','mapa','guía','documentos','seguro viaje','tarjeta','dinero','monedero'],
+  'Fiesta': ['vasos','platos','servilletas','mantel','globos','guirnaldas','velas','tarta','pastel','refrescos','hielo','snacks','patatas','aceitunas','decoración','confeti','gorros','cotillón','altavoz','luces','pajitas','cubiertos desechables','bolsas regalo','piñata','invitaciones'],
   'Otros': []
 }
 
 const detectCategory = (productName) => {
   const nameLower = productName.toLowerCase().trim()
   const words = nameLower.split(/\s+/)
-  
+
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'Otros') continue
     if (keywords.includes(nameLower)) return category
   }
-  
+
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'Otros') continue
     for (const word of words) {
       if (word.length >= 3 && keywords.includes(word)) return category
     }
   }
-  
+
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'Otros') continue
     for (const keyword of keywords) {
       if (keyword.length >= 4 && nameLower.includes(keyword)) return category
     }
   }
-  
+
   return 'Otros'
 }
 
@@ -63,7 +65,7 @@ const CATEGORY_ICONS = {
   'Frutas y Verduras': '🥬', 'Carnes': '🥩', 'Pescados y Mariscos': '🐟',
   'Lácteos': '🧀', 'Panadería': '🥖', 'Bebidas': '🥤', 'Despensa': '🫙',
   'Congelados': '🧊', 'Limpieza': '🧹', 'Higiene Personal': '🧴',
-  'Snacks y Dulces': '🍫', 'Mascotas': '🐾', 'Otros': '📦'
+  'Snacks y Dulces': '🍫', 'Mascotas': '🐾', 'Viaje': '🧳', 'Fiesta': '🎉', 'Otros': '📦'
 }
 
 const CATEGORY_COLORS = {
@@ -79,6 +81,8 @@ const CATEGORY_COLORS = {
   'Higiene Personal': 'from-pink-500 to-rose-500',
   'Snacks y Dulces': 'from-lime-500 to-pink-600',
   'Mascotas': 'from-lime-500 to-green-500',
+  'Viaje': 'from-blue-500 to-indigo-600',
+  'Fiesta': 'from-purple-500 to-pink-500',
   'Otros': 'from-slate-500 to-gray-600'
 }
 
@@ -86,21 +90,18 @@ const ALL_CATEGORIES = Object.keys(CATEGORY_ICONS)
 const UNITS = ['unidad', 'kg', 'g', 'L', 'ml', 'docena', 'paquete', 'lata', 'botella', 'bolsa', 'bote', 'tarrina', 'bandeja', 'manojo', 'racimo']
 
 // MODAL DE EDICIÓN
-function EditModal({ item, onSave, onClose, supermarkets = [], theme = {} }) {
+function EditModal({ item, onSave, onClose, theme = {} }) {
   const [name, setName] = useState(item.name)
   const [quantity, setQuantity] = useState(item.quantity || 1)
   const [unit, setUnit] = useState(item.unit || 'unidad')
   const [category, setCategory] = useState(item.category)
-  const [productUrl, setProductUrl] = useState(item.product_url || '')
-  const [showPrices, setShowPrices] = useState(false)
-  const [prices, setPrices] = useState({})
   const [isLoading, setIsLoading] = useState(false)
 
-  const { bgCard = 'bg-white', bgInput = 'bg-gray-100', text = 'text-gray-900', textMuted = 'text-gray-500', border = 'border-gray-200', bgHover = 'hover:bg-gray-200' } = theme
+  const { bgCard = 'bg-[#1e1e1e]', bgInput = 'bg-[#2a2a2a]', text = 'text-[#e0e0e0]', textMuted = 'text-[#a0a0a0]', border = 'border-white/10', bgHover = 'hover:bg-[#2a2a2a]' } = theme
 
   const handleSave = async () => {
     setIsLoading(true)
-    await onSave({ ...item, name, quantity, unit, category, product_url: productUrl, prices })
+    await onSave({ ...item, name, quantity, unit, category })
     setIsLoading(false)
     onClose()
   }
@@ -118,11 +119,11 @@ function EditModal({ item, onSave, onClose, supermarkets = [], theme = {} }) {
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className={`text-xl font-bold flex items-center gap-2 ${text}`}>
-            <Edit3 className="w-5 h-5 text-emerald-400" />Editar producto
+            <Edit3 className="w-5 h-5 text-emerald-400" />Editar elemento
           </h2>
           <button onClick={onClose} className={`w-8 h-8 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><X className="w-4 h-4" /></button>
         </div>
-        
+
         <div className="space-y-4">
           <div>
             <label className={`text-sm ${textMuted} mb-1 block`}>Nombre</label>
@@ -158,45 +159,6 @@ function EditModal({ item, onSave, onClose, supermarkets = [], theme = {} }) {
               {ALL_CATEGORIES.map(cat => <option key={cat} value={cat} className={bgCard}>{CATEGORY_ICONS[cat]} {cat}</option>)}
             </select>
           </div>
-
-          <div>
-            <label className={`text-sm ${textMuted} mb-1 block`}>URL del producto (opcional)</label>
-            <input type="url" value={productUrl} onChange={(e) => setProductUrl(e.target.value)}
-              placeholder="https://..."
-              className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 text-sm ${text}`} />
-          </div>
-
-          {supermarkets.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowPrices(!showPrices)}
-                className={`w-full flex items-center justify-between px-4 py-3 ${bgInput} rounded-2xl ${bgHover}`}
-              >
-                <span className={`text-sm ${text}`}>💰 Precios por supermercado (opcional)</span>
-                <span className="text-xs">{showPrices ? '▼' : '▶'}</span>
-              </button>
-              {showPrices && (
-                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
-                  {supermarkets.map(sm => (
-                    <div key={sm.id} className="flex items-center gap-2">
-                      <span className="text-lg">{sm.logo_emoji}</span>
-                      <span className={`text-xs ${textMuted} flex-1`}>{sm.name}</span>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="€"
-                        value={prices[sm.id] || ''}
-                        onChange={(e) => setPrices({ ...prices, [sm.id]: e.target.value })}
-                        className={`w-20 px-2 py-1 ${bgInput} border ${border} rounded-lg text-sm text-right focus:outline-none focus:border-emerald-500/50 ${text}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="flex gap-3 mt-6">
@@ -211,111 +173,104 @@ function EditModal({ item, onSave, onClose, supermarkets = [], theme = {} }) {
   )
 }
 
-// COMPARADOR INLINE DE PRECIOS
-function InlinePriceComparator({ item, supermarkets, priceEstimates, getDeepLink }) {
-  const [show, setShow] = useState(false)
-  const prices = supermarkets.map(sm => ({
-    sm,
-    price: priceEstimates[sm.id]?.[item.category] || 0
-  })).filter(p => p.price > 0).sort((a, b) => a.price - b.price)
+// MODAL DE GENERACIÓN IA
+function AIGenerateModal({ show, onClose, onGenerate, theme = {} }) {
+  const [prompt, setPrompt] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState('')
 
-  if (prices.length === 0) return null
-  const cheapest = prices[0]
+  const { bgCard = 'bg-[#1e1e1e]', bgInput = 'bg-[#2a2a2a]', text = 'text-[#e0e0e0]', textMuted = 'text-[#a0a0a0]', border = 'border-white/10', bgHover = 'hover:bg-[#2a2a2a]' } = theme
 
-  return (
-    <div className="relative">
-      <button onClick={() => setShow(!show)} className="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 flex items-center gap-1">
-        <TrendingDown className="w-3 h-3" />
-        <span>{cheapest.sm.logo_emoji} {cheapest.price.toFixed(2)}€</span>
-      </button>
-      {show && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl p-2 shadow-xl z-50 min-w-48">
-          {prices.slice(0, 3).map((p, i) => (
-            <a key={p.sm.id} href={getDeepLink(p.sm, item.name)} target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-between px-2 py-1 hover:bg-gray-100 rounded text-xs gap-2">
-              <span>{p.sm.logo_emoji} {p.sm.name}</span>
-              <span className={i === 0 ? 'text-emerald-700 font-bold' : 'text-gray-600'}>{p.price.toFixed(2)}€</span>
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
+  const examples = [
+    { label: 'Viaje 3 días', prompt: 'Lista de cosas para un viaje de una persona de 3 días' },
+    { label: 'Fiesta 10 personas', prompt: 'Lista para organizar una fiesta de cumpleaños para 10 personas' },
+    { label: 'Compra semanal', prompt: 'Lista de la compra semanal para una familia de 4 personas' },
+    { label: 'Mudanza', prompt: 'Lista de cosas necesarias para una mudanza' },
+    { label: 'Camping', prompt: 'Lista de equipamiento para un fin de semana de camping' },
+    { label: 'Bebé recién nacido', prompt: 'Lista de cosas esenciales para un bebé recién nacido' },
+  ]
 
-// PANEL DE COMPARACIÓN DE PRECIOS
-function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
   if (!show) return null
 
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return
+    setIsGenerating(true)
+    setError('')
+    try {
+      await onGenerate(prompt)
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Error al generar la lista')
+    }
+    setIsGenerating(false)
+  }
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-        className="w-full max-w-2xl h-[90vh] bg-gray-50/95 backdrop-blur-xl rounded-3xl border border-gray-200 overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingDown className="w-7 h-7 text-emerald-400" />
-              Comparar Precios
-            </h2>
-            <button onClick={onClose} className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
-              <X className="w-5 h-5" />
-            </button>
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+        className={`${bgCard} rounded-3xl p-6 w-full max-w-lg border ${border} shadow-2xl max-h-[90vh] overflow-y-auto`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className={`text-xl font-bold flex items-center gap-2 ${text}`}>
+            <Wand2 className="w-5 h-5 text-purple-400" />Generar lista con IA
+          </h2>
+          <button onClick={onClose} className={`w-8 h-8 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text}`}><X className="w-4 h-4" /></button>
+        </div>
+
+        <p className={`text-sm ${textMuted} mb-4`}>
+          Describe qué tipo de lista necesitas y la IA generará los elementos automáticamente.
+        </p>
+
+        <div className="mb-4">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Ej: Lista de la compra semanal para 2 personas..."
+            rows={3}
+            className={`w-full px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-purple-500/50 ${text} placeholder:${textMuted} resize-none`}
+          />
+        </div>
+
+        <div className="mb-4">
+          <p className={`text-xs ${textMuted} mb-2`}>Ideas rápidas:</p>
+          <div className="flex flex-wrap gap-2">
+            {examples.map((ex) => (
+              <button
+                key={ex.label}
+                onClick={() => setPrompt(ex.prompt)}
+                className={`px-3 py-1.5 rounded-xl text-xs ${bgInput} ${bgHover} ${text} border ${border} transition-all`}
+              >
+                {ex.label}
+              </button>
+            ))}
           </div>
-
-          {priceComparison && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                <div className="text-sm text-emerald-400 mb-1">Mejor opción</div>
-                <div className="text-xl font-bold">{priceComparison.cheapest.supermarket.logo_emoji} {priceComparison.cheapest.supermarket.name}</div>
-                <div className="text-2xl font-black text-emerald-400">{priceComparison.cheapest.total.toFixed(2)}€</div>
-              </div>
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                <div className="text-sm text-emerald-400 mb-1">Ahorras</div>
-                <div className="text-2xl font-black text-emerald-400">{priceComparison.savings.toFixed(2)}€</div>
-                <div className="text-sm text-gray-500">vs más caro</div>
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
-          {priceComparison ? (
-            <div className="space-y-3">
-              {priceComparison.comparisons.map((comp, index) => {
-                const percentage = (comp.total / priceComparison.mostExpensive.total) * 100
-                const isCheapest = comp.supermarket.id === priceComparison.cheapest.supermarket.id
-                return (
-                  <motion.div key={comp.supermarket.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}
-                    className={`p-4 rounded-2xl border ${isCheapest ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-gray-100 border-gray-200'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{comp.supermarket.logo_emoji}</span>
-                        <span className="font-semibold">{comp.supermarket.name}</span>
-                        {isCheapest && <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold">MEJOR PRECIO</span>}
-                      </div>
-                      <span className="text-2xl font-bold">{comp.total.toFixed(2)}€</span>
-                    </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} transition={{ delay: index * 0.05 + 0.2 }}
-                        className={`h-full rounded-full ${isCheapest ? 'bg-gradient-to-r from-emerald-500 to-green-500' : 'bg-gradient-to-r from-emerald-500 to-lime-500'}`} />
-                    </div>
-                  </motion.div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <Loader2 className="w-8 h-8 animate-spin" />
-            </div>
-          )}
-        </div>
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
 
-        <div className="p-6 border-t border-gray-200">
-          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={onShare}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold flex items-center justify-center gap-2">
-            <Share2 className="w-5 h-5" />
-            Compartir con precios
+        <div className="flex gap-3">
+          <button onClick={onClose} className={`flex-1 py-3 px-6 ${bgInput} rounded-2xl font-medium ${bgHover} ${text}`}>Cancelar</button>
+          <motion.button
+            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+            onClick={handleGenerate}
+            disabled={isGenerating || !prompt.trim()}
+            className="flex-1 py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <><Loader2 className="w-5 h-5 animate-spin" />Generando...</>
+            ) : (
+              <><Wand2 className="w-5 h-5" />Generar</>
+            )}
           </motion.button>
         </div>
       </motion.div>
@@ -324,39 +279,35 @@ function PriceComparisonPanel({ show, onClose, priceComparison, onShare }) {
 }
 
 // VISTA DE FAVORITOS
-function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchTerm }) {
+function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchTerm, theme = {} }) {
   if (!show) return null
+
+  const { bgCard = 'bg-[#1e1e1e]', bgInput = 'bg-[#2a2a2a]', text = 'text-[#e0e0e0]', textMuted = 'text-[#a0a0a0]', border = 'border-white/10', bgHover = 'hover:bg-[#2a2a2a]' } = theme
 
   const filteredFavorites = favorites.filter(f =>
     f.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const categoryIcons = {
-    'Frutas y Verduras': '🥬', 'Carnes': '🥩', 'Pescados y Mariscos': '🐟', 'Lácteos': '🥛',
-    'Panadería': '🥖', 'Bebidas': '🥤', 'Despensa': '🏺', 'Congelados': '🧊',
-    'Limpieza': '🧹', 'Higiene Personal': '🧴', 'Snacks y Dulces': '🍫', 'Mascotas': '🐾', 'Otros': '📦'
-  }
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-2xl max-h-[90vh] bg-gray-50/95 backdrop-blur-xl rounded-3xl border border-gray-200 overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-gray-200">
+        className={`w-full max-w-2xl max-h-[90vh] ${bgCard} backdrop-blur-xl rounded-3xl border ${border} overflow-hidden flex flex-col`}>
+        <div className={`p-6 border-b ${border}`}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
+            <h2 className={`text-2xl font-bold flex items-center gap-2 ${text}`}>
               <Star className="w-7 h-7 text-yellow-400 fill-yellow-400" />
-              Productos Favoritos
+              Favoritos
             </h2>
-            <button onClick={onClose} className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+            <button onClick={onClose} className={`w-10 h-10 rounded-xl ${bgInput} ${bgHover} flex items-center justify-center ${text}`}>
               <X className="w-5 h-5" />
             </button>
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 ${textMuted}`} />
             <input type="text" placeholder="Buscar favorito..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:text-gray-400" />
+              className={`w-full pl-10 pr-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 ${text} placeholder:${textMuted}`} />
           </div>
         </div>
 
@@ -365,19 +316,19 @@ function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchT
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredFavorites.map((fav, index) => (
                 <motion.div key={fav.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}
-                  className="p-4 rounded-2xl bg-gray-100 border border-gray-200 hover:bg-gray-200 transition-colors">
+                  className={`p-4 rounded-2xl ${bgInput} border ${border} ${bgHover} transition-colors`}>
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-2xl">{categoryIcons[fav.category] || '📦'}</span>
+                      <span className="text-2xl">{CATEGORY_ICONS[fav.category] || '📦'}</span>
                       <div>
-                        <div className="font-semibold">{fav.name}</div>
-                        <div className="text-sm text-gray-500">{fav.quantity} {fav.unit}</div>
+                        <div className={`font-semibold ${text}`}>{fav.name}</div>
+                        <div className={`text-sm ${textMuted}`}>{fav.quantity} {fav.unit}</div>
                       </div>
                     </div>
                     <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
                   </div>
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-xs text-gray-500">Usado {fav.use_count} {fav.use_count === 1 ? 'vez' : 'veces'}</span>
+                    <span className={`text-xs ${textMuted}`}>Usado {fav.use_count} {fav.use_count === 1 ? 'vez' : 'veces'}</span>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => onAdd(fav)}
                       className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-lime-600 text-white text-sm font-semibold flex items-center gap-1">
                       <Plus className="w-4 h-4" />
@@ -388,10 +339,10 @@ function FavoritesView({ show, onClose, favorites, onAdd, searchTerm, setSearchT
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <div className={`flex flex-col items-center justify-center h-full ${textMuted}`}>
               <Star className="w-16 h-16 mb-4" />
               <p className="text-lg">No hay favoritos aún</p>
-              <p className="text-sm">Marca productos con ⭐ para acceso rápido</p>
+              <p className="text-sm">Marca elementos con la estrella para acceso rápido</p>
             </div>
           )}
         </div>
@@ -407,9 +358,6 @@ function App() {
   const [currentList, setCurrentList] = useState(null)
   const [items, setItems] = useState([])
   const [newItemName, setNewItemName] = useState('')
-  const [productSuggestions, setProductSuggestions] = useState([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
   const [accessCode, setAccessCode] = useState('')
   const [newListName, setNewListName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -422,13 +370,6 @@ function App() {
   const [viewMode, setViewMode] = useState('compact')
   const inputRef = useRef(null)
 
-  // Estados para comparador de precios
-  const [priceComparison, setPriceComparison] = useState(null)
-  const [showPriceComparison, setShowPriceComparison] = useState(false)
-  const [supermarkets, setSupermarkets] = useState([])
-  const [priceEstimates, setPriceEstimates] = useState({})
-  const [itemPrices, setItemPrices] = useState({}) // {itemId: {supermarketId: price}}
-
   // Estados para modo compra
   const [shoppingMode, setShoppingMode] = useState(false)
 
@@ -437,10 +378,13 @@ function App() {
   const [favorites, setFavorites] = useState([])
   const [favoriteSearchTerm, setFavoriteSearchTerm] = useState('')
 
-  // Estado para tema (dark/light)
+  // Estado para modal IA
+  const [showAIModal, setShowAIModal] = useState(false)
+
+  // Estado para tema (dark/light) - dark por defecto
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme')
-    return saved || 'light'
+    return saved || 'dark'
   })
 
   // Guardar tema en localStorage
@@ -456,11 +400,11 @@ function App() {
   const isDark = theme === 'dark'
   const bg = isDark ? 'bg-[#121212]' : 'bg-gray-50'
   const bgCard = isDark ? 'bg-[#1e1e1e]' : 'bg-white'
-  const bgInput = isDark ? 'bg-[#2a2a2a]' : 'bg-white'  // Mayor contraste en modo claro
-  const bgHover = isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'  // Hover más sutil
+  const bgInput = isDark ? 'bg-[#2a2a2a]' : 'bg-white'
+  const bgHover = isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'
   const text = isDark ? 'text-[#e0e0e0]' : 'text-gray-900'
   const textMuted = isDark ? 'text-[#a0a0a0]' : 'text-gray-500'
-  const border = isDark ? 'border-white/10' : 'border-gray-300'  // Border más visible
+  const border = isDark ? 'border-white/10' : 'border-gray-300'
   const bgHeader = isDark ? 'bg-[#121212]/80' : 'bg-gray-50/95'
 
   const showNotification = (message, type = 'success') => {
@@ -488,11 +432,13 @@ function App() {
     const { data, error } = await supabase.from('shopping_lists').insert([{ name: newListName, access_code: code }]).select().single()
     if (error) { showNotification('Error al crear', 'error'); setIsLoading(false); return }
     setCurrentList(data); setAccessCode(code); setNewListName('')
-    setView('list') // Bug fix: actualizar vista antes de navegar
+    setView('list')
     setIsLoading(false)
     navigate(`/list/${code}`)
     showNotification('¡Lista creada!')
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } })
+    // Mostrar modal de IA después de crear
+    setTimeout(() => setShowAIModal(true), 500)
   }
 
   const joinList = async () => {
@@ -504,6 +450,222 @@ function App() {
     navigate(`/list/${accessCode.toUpperCase()}`)
     showNotification('¡Te has unido!')
   }
+
+  // ==========================================
+  // GENERACIÓN CON IA (Groq - gratis)
+  // ==========================================
+
+  const generateWithAI = async (prompt) => {
+    const groqKey = import.meta.env.VITE_GROQ_API_KEY
+
+    if (!groqKey) {
+      // Fallback: generación local inteligente
+      return generateLocalList(prompt)
+    }
+
+    const systemPrompt = `Eres un asistente que genera listas de elementos. El usuario te pedirá una lista para un propósito específico.
+Responde SOLO con un JSON array de objetos, sin explicaciones ni texto adicional. Cada objeto debe tener:
+- "name": nombre del elemento (string)
+- "quantity": cantidad numérica (number)
+- "unit": unidad (string, una de: unidad, kg, g, L, ml, docena, paquete, lata, botella, bolsa, bote, tarrina, bandeja, manojo, racimo)
+
+Ejemplo de respuesta:
+[{"name":"Manzanas","quantity":6,"unit":"unidad"},{"name":"Arroz","quantity":1,"unit":"kg"}]
+
+Genera entre 10 y 30 elementos según la complejidad de la petición. Sé práctico y realista.`
+
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqKey}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    })
+
+    if (!res.ok) {
+      throw new Error('Error al conectar con la IA. Verifica tu API key de Groq.')
+    }
+
+    const data = await res.json()
+    const content = data.choices?.[0]?.message?.content || ''
+
+    // Extraer JSON del response
+    const jsonMatch = content.match(/\[[\s\S]*\]/)
+    if (!jsonMatch) throw new Error('La IA no generó una respuesta válida')
+
+    const generatedItems = JSON.parse(jsonMatch[0])
+    await addGeneratedItems(generatedItems)
+  }
+
+  const generateLocalList = async (prompt) => {
+    const promptLower = prompt.toLowerCase()
+
+    // Templates inteligentes basados en keywords
+    const templates = {
+      viaje: [
+        { name: 'Ropa interior', quantity: 4, unit: 'unidad' },
+        { name: 'Calcetines', quantity: 4, unit: 'unidad' },
+        { name: 'Camisetas', quantity: 3, unit: 'unidad' },
+        { name: 'Pantalón', quantity: 2, unit: 'unidad' },
+        { name: 'Cargador móvil', quantity: 1, unit: 'unidad' },
+        { name: 'Neceser', quantity: 1, unit: 'unidad' },
+        { name: 'Cepillo de dientes', quantity: 1, unit: 'unidad' },
+        { name: 'Pasta de dientes', quantity: 1, unit: 'unidad' },
+        { name: 'Champú mini', quantity: 1, unit: 'unidad' },
+        { name: 'Desodorante', quantity: 1, unit: 'unidad' },
+        { name: 'Protector solar', quantity: 1, unit: 'unidad' },
+        { name: 'Gafas de sol', quantity: 1, unit: 'unidad' },
+        { name: 'Documentos/DNI', quantity: 1, unit: 'unidad' },
+        { name: 'Medicamentos básicos', quantity: 1, unit: 'unidad' },
+        { name: 'Adaptador enchufe', quantity: 1, unit: 'unidad' },
+        { name: 'Botella de agua', quantity: 1, unit: 'unidad' },
+      ],
+      fiesta: [
+        { name: 'Refrescos variados', quantity: 10, unit: 'botella' },
+        { name: 'Cervezas', quantity: 2, unit: 'paquete' },
+        { name: 'Hielo', quantity: 3, unit: 'bolsa' },
+        { name: 'Patatas fritas', quantity: 4, unit: 'bolsa' },
+        { name: 'Nachos', quantity: 2, unit: 'bolsa' },
+        { name: 'Aceitunas', quantity: 2, unit: 'bote' },
+        { name: 'Servilletas', quantity: 2, unit: 'paquete' },
+        { name: 'Vasos desechables', quantity: 1, unit: 'paquete' },
+        { name: 'Platos desechables', quantity: 1, unit: 'paquete' },
+        { name: 'Globos', quantity: 1, unit: 'paquete' },
+        { name: 'Guirnaldas', quantity: 2, unit: 'unidad' },
+        { name: 'Tarta', quantity: 1, unit: 'unidad' },
+        { name: 'Velas', quantity: 1, unit: 'paquete' },
+        { name: 'Pizza', quantity: 3, unit: 'unidad' },
+        { name: 'Embutido variado', quantity: 500, unit: 'g' },
+        { name: 'Queso', quantity: 300, unit: 'g' },
+      ],
+      compra: [
+        { name: 'Leche', quantity: 2, unit: 'L' },
+        { name: 'Pan', quantity: 1, unit: 'unidad' },
+        { name: 'Huevos', quantity: 1, unit: 'docena' },
+        { name: 'Pollo', quantity: 1, unit: 'kg' },
+        { name: 'Arroz', quantity: 1, unit: 'kg' },
+        { name: 'Pasta', quantity: 500, unit: 'g' },
+        { name: 'Tomate frito', quantity: 2, unit: 'bote' },
+        { name: 'Aceite de oliva', quantity: 1, unit: 'botella' },
+        { name: 'Manzanas', quantity: 1, unit: 'kg' },
+        { name: 'Plátanos', quantity: 6, unit: 'unidad' },
+        { name: 'Lechuga', quantity: 1, unit: 'unidad' },
+        { name: 'Tomates', quantity: 1, unit: 'kg' },
+        { name: 'Yogures', quantity: 1, unit: 'paquete' },
+        { name: 'Queso fresco', quantity: 1, unit: 'unidad' },
+        { name: 'Papel higiénico', quantity: 1, unit: 'paquete' },
+        { name: 'Jabón lavavajillas', quantity: 1, unit: 'botella' },
+        { name: 'Detergente ropa', quantity: 1, unit: 'botella' },
+        { name: 'Agua mineral', quantity: 6, unit: 'botella' },
+      ],
+      mudanza: [
+        { name: 'Cajas de cartón grandes', quantity: 10, unit: 'unidad' },
+        { name: 'Cajas de cartón medianas', quantity: 15, unit: 'unidad' },
+        { name: 'Cinta de embalar', quantity: 3, unit: 'unidad' },
+        { name: 'Plástico de burbujas', quantity: 2, unit: 'unidad' },
+        { name: 'Rotuladores permanentes', quantity: 3, unit: 'unidad' },
+        { name: 'Etiquetas adhesivas', quantity: 1, unit: 'paquete' },
+        { name: 'Bolsas de basura grandes', quantity: 1, unit: 'paquete' },
+        { name: 'Papel de periódico', quantity: 1, unit: 'paquete' },
+        { name: 'Tijeras', quantity: 2, unit: 'unidad' },
+        { name: 'Cúter', quantity: 2, unit: 'unidad' },
+        { name: 'Guantes de trabajo', quantity: 2, unit: 'unidad' },
+        { name: 'Herramientas básicas', quantity: 1, unit: 'unidad' },
+        { name: 'Fundas para colchón', quantity: 1, unit: 'unidad' },
+        { name: 'Candados', quantity: 2, unit: 'unidad' },
+      ],
+      camping: [
+        { name: 'Tienda de campaña', quantity: 1, unit: 'unidad' },
+        { name: 'Saco de dormir', quantity: 1, unit: 'unidad' },
+        { name: 'Esterilla', quantity: 1, unit: 'unidad' },
+        { name: 'Linterna', quantity: 1, unit: 'unidad' },
+        { name: 'Pilas extra', quantity: 1, unit: 'paquete' },
+        { name: 'Mechero/cerillas', quantity: 2, unit: 'unidad' },
+        { name: 'Navaja multiusos', quantity: 1, unit: 'unidad' },
+        { name: 'Botella de agua', quantity: 2, unit: 'L' },
+        { name: 'Protector solar', quantity: 1, unit: 'unidad' },
+        { name: 'Repelente insectos', quantity: 1, unit: 'unidad' },
+        { name: 'Botiquín', quantity: 1, unit: 'unidad' },
+        { name: 'Comida enlatada', quantity: 4, unit: 'lata' },
+        { name: 'Snacks y frutos secos', quantity: 3, unit: 'bolsa' },
+        { name: 'Papel higiénico', quantity: 2, unit: 'unidad' },
+        { name: 'Bolsas de basura', quantity: 1, unit: 'paquete' },
+        { name: 'Hornillo portátil', quantity: 1, unit: 'unidad' },
+      ],
+      bebe: [
+        { name: 'Pañales recién nacido', quantity: 2, unit: 'paquete' },
+        { name: 'Toallitas húmedas', quantity: 3, unit: 'paquete' },
+        { name: 'Body manga corta', quantity: 6, unit: 'unidad' },
+        { name: 'Body manga larga', quantity: 6, unit: 'unidad' },
+        { name: 'Pijamas', quantity: 4, unit: 'unidad' },
+        { name: 'Gorrito', quantity: 2, unit: 'unidad' },
+        { name: 'Biberones', quantity: 3, unit: 'unidad' },
+        { name: 'Chupetes', quantity: 2, unit: 'unidad' },
+        { name: 'Crema del pañal', quantity: 1, unit: 'unidad' },
+        { name: 'Gel baño bebé', quantity: 1, unit: 'unidad' },
+        { name: 'Termómetro', quantity: 1, unit: 'unidad' },
+        { name: 'Mantitas', quantity: 2, unit: 'unidad' },
+        { name: 'Cuna o minicuna', quantity: 1, unit: 'unidad' },
+        { name: 'Sábanas cuna', quantity: 3, unit: 'unidad' },
+        { name: 'Muselinas', quantity: 4, unit: 'unidad' },
+        { name: 'Leche de fórmula', quantity: 1, unit: 'bote' },
+      ]
+    }
+
+    // Detectar tipo de lista
+    let selectedTemplate = templates.compra // default
+    if (promptLower.includes('viaje') || promptLower.includes('vacacion') || promptLower.includes('maleta')) {
+      selectedTemplate = templates.viaje
+    } else if (promptLower.includes('fiesta') || promptLower.includes('cumpleaños') || promptLower.includes('celebra')) {
+      selectedTemplate = templates.fiesta
+    } else if (promptLower.includes('mudanza') || promptLower.includes('mudar')) {
+      selectedTemplate = templates.mudanza
+    } else if (promptLower.includes('camping') || promptLower.includes('acampar') || promptLower.includes('campamento')) {
+      selectedTemplate = templates.camping
+    } else if (promptLower.includes('bebé') || promptLower.includes('bebe') || promptLower.includes('recién nacido') || promptLower.includes('embaraz')) {
+      selectedTemplate = templates.bebe
+    }
+
+    await addGeneratedItems(selectedTemplate)
+  }
+
+  const addGeneratedItems = async (generatedItems) => {
+    if (!currentList || !generatedItems.length) return
+
+    for (const item of generatedItems) {
+      const category = detectCategory(item.name)
+      const { error } = await supabase
+        .from('shopping_items')
+        .insert([{
+          list_id: currentList.id,
+          name: item.name,
+          quantity: item.quantity || 1,
+          unit: item.unit || 'unidad',
+          category,
+          completed: false
+        }])
+
+      if (!error) {
+        // No need for optimistic update - real-time will handle it
+      }
+    }
+
+    showNotification(`${generatedItems.length} elementos añadidos`)
+    confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } })
+  }
+
+  // ==========================================
+  // CRUD ITEMS
+  // ==========================================
 
   const addItem = async (e) => {
     e.preventDefault()
@@ -522,7 +684,6 @@ function App() {
       created_at: new Date().toISOString()
     }
 
-    // UPDATE INMEDIATO (optimista)
     setItems(prev => [newItem, ...prev])
     setNewItemName('')
     inputRef.current?.focus()
@@ -542,8 +703,6 @@ function App() {
         .single()
 
       if (error) throw error
-
-      // Reemplazar temp ID con ID real
       setItems(prev => prev.map(item => item.id === tempId ? data : item))
 
       await supabase.from('purchase_history').insert([{
@@ -553,7 +712,6 @@ function App() {
         action: 'added'
       }])
     } catch (error) {
-      // ROLLBACK
       setItems(prev => prev.filter(item => item.id !== tempId))
       showNotification('Error al añadir', 'error')
       setNewItemName(newItem.name)
@@ -562,8 +720,6 @@ function App() {
 
   const updateItem = async (updatedItem) => {
     const previousItems = [...items]
-
-    // UPDATE INMEDIATO (optimista)
     setItems(prev => prev.map(item =>
       item.id === updatedItem.id ? updatedItem : item
     ))
@@ -575,37 +731,13 @@ function App() {
           name: updatedItem.name,
           quantity: updatedItem.quantity,
           unit: updatedItem.unit,
-          category: updatedItem.category,
-          product_url: updatedItem.product_url || null
+          category: updatedItem.category
         })
         .eq('id', updatedItem.id)
 
       if (error) throw error
-
-      // Guardar precios personalizados si existen
-      if (updatedItem.prices && Object.keys(updatedItem.prices).length > 0) {
-        for (const [supermarketId, price] of Object.entries(updatedItem.prices)) {
-          if (price && parseFloat(price) > 0) {
-            await supabase
-              .from('item_prices')
-              .upsert({
-                item_id: updatedItem.id,
-                list_id: currentList.id,
-                supermarket_id: supermarketId,
-                price: parseFloat(price),
-                is_real_price: true,
-                source: 'manual',
-                last_verified_at: new Date().toISOString()
-              }, {
-                onConflict: 'item_id,supermarket_id'
-              })
-          }
-        }
-      }
-
       showNotification('Actualizado', 'success')
     } catch (error) {
-      // ROLLBACK
       setItems(previousItems)
       showNotification('Error al actualizar', 'error')
     }
@@ -615,14 +747,12 @@ function App() {
     const previousItems = [...items]
     const newCompleted = !item.completed
 
-    // UPDATE INMEDIATO (optimista)
     setItems(prev => prev.map(i =>
       i.id === item.id
         ? { ...i, completed: newCompleted, completed_at: newCompleted ? new Date().toISOString() : null }
         : i
     ))
 
-    // Confetti inmediato
     if (newCompleted) {
       confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 }, colors: ['#10b981', '#34d399', '#6ee7b7'] })
     }
@@ -638,7 +768,6 @@ function App() {
 
       if (error) throw error
 
-      // Historial solo si no falla
       if (newCompleted) {
         await supabase.from('purchase_history').insert([{
           list_id: currentList.id,
@@ -648,7 +777,6 @@ function App() {
         }])
       }
     } catch (error) {
-      // ROLLBACK
       setItems(previousItems)
       showNotification('Error al actualizar', 'error')
     }
@@ -656,8 +784,6 @@ function App() {
 
   const deleteItem = async (id) => {
     const previousItems = [...items]
-
-    // DELETE INMEDIATO (optimista)
     setItems(prev => prev.filter(item => item.id !== id))
 
     try {
@@ -668,7 +794,6 @@ function App() {
 
       if (error) throw error
     } catch (error) {
-      // ROLLBACK
       setItems(previousItems)
       showNotification('Error al eliminar', 'error')
     }
@@ -701,273 +826,71 @@ function App() {
   }
 
   // ==========================================
-  // OPEN FOOD FACTS & GEOLOCALIZACIÓN
+  // WHATSAPP SHARE
   // ==========================================
 
-  const searchOpenFoodFacts = async (query) => {
-    if (!query || query.length < 3) return []
-    try {
-      const res = await fetch(`https://es.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&json=1&page_size=8&countries=España&fields=product_name,product_name_es,brands,image_small_url,code&tagtype_0=countries&tag_contains_0=contains&tag_0=españa`)
-      const data = await res.json()
-      return data.products
-        ?.filter(p => {
-          const name = p.product_name_es || p.product_name || ''
-          // Filtrar solo productos con nombre en caracteres latinos (no árabe, cirílico, etc)
-          return name && /^[\p{Script=Latin}\p{N}\p{P}\s]+$/u.test(name)
-        })
-        .map(p => ({
-          name: (p.product_name_es || p.product_name || '').trim(),
-          brand: (p.brands || '').split(',')[0].trim(),
-          image: p.image_small_url,
-          barcode: p.code
-        }))
-        .slice(0, 5) || []
-    } catch { return [] }
-  }
-
-  const searchProductSuggestions = useCallback(async (query) => {
-    if (!query || query.length < 3) { setProductSuggestions([]); setShowSuggestions(false); return }
-    setLoadingSuggestions(true)
-    const results = await searchOpenFoodFacts(query)
-    setProductSuggestions(results)
-    setShowSuggestions(results.length > 0)
-    setLoadingSuggestions(false)
-  }, [])
-
-  const selectSuggestion = (suggestion) => {
-    const fullName = suggestion.brand ? `${suggestion.brand} ${suggestion.name}` : suggestion.name
-    setNewItemName(fullName)
-    setShowSuggestions(false)
-    setProductSuggestions([])
-  }
-
-  const getDeepLink = (supermarket, productName) => {
-    const query = encodeURIComponent(productName)
-    const links = {
-      'Mercadona': `https://www.mercadona.es/search/${query}`,
-      'Carrefour': `https://www.carrefour.es/supermercado/search?q=${query}`,
-      'Lidl': `https://www.lidl.es/es/search?q=${query}`,
-      'Aldi': `https://www.aldi.es/busqueda.html?text=${query}`,
-      'DIA': `https://www.dia.es/compra-online/search?q=${query}`,
-      'Alcampo': `https://www.alcampo.es/compra-online/search/?q=${query}`,
-      'Amazon Fresh': `https://www.amazon.es/s?k=${query}&i=amazonfresh`
-    }
-    return links[supermarket.name] || `https://www.google.com/search?q=${query}+${supermarket.name}`
-  }
-
-  const getNearbySupermárkets = async () => {
-    if (!navigator.geolocation) return supermarkets
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-          // Coordenadas aproximadas de supermercados en España (ejemplo Madrid)
-          const locations = {
-            'Mercadona': { lat: 40.4168, lng: -3.7038 },
-            'Carrefour': { lat: 40.4200, lng: -3.7000 },
-            'Lidl': { lat: 40.4150, lng: -3.7050 },
-            'Aldi': { lat: 40.4180, lng: -3.7020 },
-            'DIA': { lat: 40.4160, lng: -3.7040 },
-            'Alcampo': { lat: 40.4190, lng: -3.7010 },
-            'Amazon Fresh': { lat: 40.4170, lng: -3.7030 }
-          }
-          const withDistance = supermarkets.map(sm => ({
-            ...sm,
-            distance: Math.sqrt(
-              Math.pow(coords.lat - (locations[sm.name]?.lat || 40.4168), 2) +
-              Math.pow(coords.lng - (locations[sm.name]?.lng || -3.7038), 2)
-            )
-          }))
-          resolve(withDistance.sort((a, b) => a.distance - b.distance))
-        },
-        () => resolve(supermarkets)
-      )
-    })
-  }
-
-  // ==========================================
-  // FUNCIONES PARA COMPARADOR DE PRECIOS
-  // ==========================================
-
-  const loadSupermarkets = async () => {
-    const { data, error } = await supabase
-      .from('supermarkets')
-      .select('*')
-      .order('display_order')
-
-    if (data && !error) {
-      setSupermarkets(data)
-
-      // Cargar precios estimados
-      const { data: estimates } = await supabase
-        .from('price_estimates')
-        .select('*')
-
-      if (estimates) {
-        const estimatesMap = {}
-        estimates.forEach(est => {
-          if (!estimatesMap[est.supermarket_id]) estimatesMap[est.supermarket_id] = {}
-          estimatesMap[est.supermarket_id][est.category] = est.estimated_price_per_unit
-        })
-        setPriceEstimates(estimatesMap)
-      }
-    }
-  }
-
-  const loadPriceComparison = async () => {
-    if (!currentList || !supermarkets.length) return
-
-    setIsLoading(true)
-
-    // Ordenar supermercados por proximidad
-    const nearbySupermarkets = await getNearbySupermárkets()
-
-    // Calcular total para cada supermercado
-    const comparisons = []
-
-    for (const supermarket of nearbySupermarkets) {
-      let total = 0
-      const pendingItems = items.filter(i => !i.completed)
-
-      for (const item of pendingItems) {
-        // 1. Buscar precio personalizado
-        const { data: customPrice } = await supabase
-          .from('item_prices')
-          .select('custom_price')
-          .eq('item_id', item.id)
-          .eq('supermarket_id', supermarket.id)
-          .single()
-
-        let price = customPrice?.custom_price
-
-        // 2. Si no existe, usar estimado por categoría
-        if (!price) {
-          price = priceEstimates[supermarket.id]?.[item.category] || 0
-        }
-
-        // 3. Multiplicar por cantidad
-        total += (price * (item.quantity || 1))
-      }
-
-      comparisons.push({
-        supermarket: supermarket,
-        total: total,
-        itemCount: pendingItems.length
-      })
-    }
-
-    // Ordenar por precio (más barato primero)
-    comparisons.sort((a, b) => a.total - b.total)
-
-    setPriceComparison({
-      comparisons,
-      cheapest: comparisons[0],
-      mostExpensive: comparisons[comparisons.length - 1],
-      savings: comparisons[comparisons.length - 1].total - comparisons[0].total
-    })
-
-    setIsLoading(false)
-  }
-
-  // ==========================================
-  // FUNCIONES PARA WHATSAPP
-  // ==========================================
-
-  const shareToWhatsApp = async (includePrice = false) => {
+  const shareToWhatsApp = async () => {
     const url = `${window.location.origin}/list/${currentList.access_code}`
     const pendingItems = items.filter(i => !i.completed)
 
-    let text = `🛒 *${currentList.name}*\n\n`
-    text += `📋 Productos pendientes (${pendingItems.length}):\n\n`
+    let shareText = `📋 *${currentList.name}*\n\n`
+    shareText += `Elementos pendientes (${pendingItems.length}):\n\n`
 
-    // Agrupar por categoría
     const grouped = pendingItems.reduce((acc, item) => {
       if (!acc[item.category]) acc[item.category] = []
       acc[item.category].push(item)
       return acc
     }, {})
 
-    // Iconos por categoría
-    const categoryIcons = {
-      'Frutas y Verduras': '🥬',
-      'Carnes': '🥩',
-      'Pescados y Mariscos': '🐟',
-      'Lácteos': '🥛',
-      'Panadería': '🥖',
-      'Bebidas': '🥤',
-      'Despensa': '🏺',
-      'Congelados': '🧊',
-      'Limpieza': '🧹',
-      'Higiene Personal': '🧴',
-      'Snacks y Dulces': '🍫',
-      'Mascotas': '🐾',
-      'Otros': '📦'
-    }
-
     Object.entries(grouped).forEach(([category, categoryItems]) => {
-      const icon = categoryIcons[category] || '📦'
-      text += `*${icon} ${category}*\n`
+      const icon = CATEGORY_ICONS[category] || '📦'
+      shareText += `*${icon} ${category}*\n`
       categoryItems.forEach(item => {
-        text += `  • ${item.name}`
+        shareText += `  • ${item.name}`
         if (item.quantity > 1 || item.unit !== 'unidad') {
-          text += ` (${item.quantity} ${item.unit})`
+          shareText += ` (${item.quantity} ${item.unit})`
         }
-        text += '\n'
+        shareText += '\n'
       })
-      text += '\n'
+      shareText += '\n'
     })
 
-    if (includePrice && priceComparison) {
-      text += `💰 *Mejor precio:* ${priceComparison.cheapest.supermarket.name} - ${priceComparison.cheapest.total.toFixed(2)}€\n\n`
-    }
+    shareText += `🔗 Unirse: ${url}`
 
-    text += `🔗 Unirse: ${url}`
-
-    // Intentar Web Share API
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: currentList.name,
-          text: text
-        })
+        await navigator.share({ title: currentList.name, text: shareText })
         showNotification('¡Compartido!')
       } catch (err) {
         if (err.name !== 'AbortError') {
-          fallbackWhatsAppShare(text)
+          const encodedText = encodeURIComponent(shareText)
+          window.open(`https://wa.me/?text=${encodedText}`, '_blank')
+          showNotification('Abriendo WhatsApp...')
         }
       }
     } else {
-      fallbackWhatsAppShare(text)
+      const encodedText = encodeURIComponent(shareText)
+      window.open(`https://wa.me/?text=${encodedText}`, '_blank')
+      showNotification('Abriendo WhatsApp...')
     }
   }
 
-  const fallbackWhatsAppShare = (text) => {
-    const encodedText = encodeURIComponent(text)
-    const whatsappUrl = `https://wa.me/?text=${encodedText}`
-    window.open(whatsappUrl, '_blank')
-    showNotification('Abriendo WhatsApp...')
-  }
-
   // ==========================================
-  // FUNCIONES PARA FAVORITOS
+  // FAVORITOS
   // ==========================================
 
   const loadFavorites = async () => {
     if (!currentList) return
-
     const { data, error } = await supabase
       .from('favorite_products')
       .select('*')
       .eq('list_id', currentList.id)
       .order('use_count', { ascending: false })
 
-    if (data && !error) {
-      setFavorites(data)
-    }
+    if (data && !error) setFavorites(data)
   }
 
   const toggleFavorite = async (item) => {
-    // Verificar si ya es favorito
     const { data: existing } = await supabase
       .from('favorite_products')
       .select('id')
@@ -976,35 +899,24 @@ function App() {
       .single()
 
     if (existing) {
-      // Eliminar de favoritos
-      await supabase
-        .from('favorite_products')
-        .delete()
-        .eq('id', existing.id)
-
+      await supabase.from('favorite_products').delete().eq('id', existing.id)
       showNotification('Eliminado de favoritos')
     } else {
-      // Añadir a favoritos
-      await supabase
-        .from('favorite_products')
-        .insert([{
-          list_id: currentList.id,
-          name: item.name,
-          quantity: item.quantity,
-          unit: item.unit,
-          category: item.category,
-          use_count: 0
-        }])
-
+      await supabase.from('favorite_products').insert([{
+        list_id: currentList.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        use_count: 0
+      }])
       showNotification('¡Añadido a favoritos!', 'success')
       confetti({ particleCount: 20, spread: 40, origin: { y: 0.6 } })
     }
-
     loadFavorites()
   }
 
   const addFromFavorite = async (favorite) => {
-    // Añadir a la lista
     const { error } = await supabase
       .from('shopping_items')
       .insert([{
@@ -1017,88 +929,54 @@ function App() {
       }])
 
     if (!error) {
-      // Incrementar contador de uso
       await supabase.rpc('increment_favorite_use', { p_favorite_id: favorite.id })
-
       showNotification(`${favorite.name} añadido`)
       loadFavorites()
     }
   }
 
-  const isFavorite = (itemName) => {
-    return favorites.some(f => f.name === itemName)
-  }
+  const isFavorite = (itemName) => favorites.some(f => f.name === itemName)
 
   // ==========================================
-  // FUNCIONES PARA MODO COMPRA
+  // MODO COMPRA
   // ==========================================
 
   const toggleShoppingMode = async () => {
     if (!currentList) return
-
     const newMode = !shoppingMode
     setShoppingMode(newMode)
 
-    // Guardar en BD
-    const { data: existing } = await supabase
-      .from('list_settings')
-      .select('id')
-      .eq('list_id', currentList.id)
-      .single()
-
+    const { data: existing } = await supabase.from('list_settings').select('id').eq('list_id', currentList.id).single()
     if (existing) {
-      await supabase
-        .from('list_settings')
-        .update({ shopping_mode_enabled: newMode })
-        .eq('id', existing.id)
+      await supabase.from('list_settings').update({ shopping_mode_enabled: newMode }).eq('id', existing.id)
     } else {
-      await supabase
-        .from('list_settings')
-        .insert([{
-          list_id: currentList.id,
-          shopping_mode_enabled: newMode
-        }])
+      await supabase.from('list_settings').insert([{ list_id: currentList.id, shopping_mode_enabled: newMode }])
     }
-
     showNotification(newMode ? 'Modo compra activado' : 'Modo normal', 'success')
   }
 
   const loadListSettings = async () => {
     if (!currentList) return
-
-    const { data } = await supabase
-      .from('list_settings')
-      .select('*')
-      .eq('list_id', currentList.id)
-      .single()
-
-    if (data) {
-      setShoppingMode(data.shopping_mode_enabled)
-    }
+    const { data } = await supabase.from('list_settings').select('*').eq('list_id', currentList.id).single()
+    if (data) setShoppingMode(data.shopping_mode_enabled)
   }
 
-  // Cargar lista desde URL al montar
+  // ==========================================
+  // EFFECTS
+  // ==========================================
+
   useEffect(() => {
     const pathname = window.location.pathname
     const match = pathname.match(/^\/list\/([A-Z0-9]{6})$/i)
-
     if (match) {
       const code = match[1].toUpperCase()
       const loadListFromUrl = async () => {
         setIsLoading(true)
-        const { data, error } = await supabase
-          .from('shopping_lists')
-          .select('*')
-          .eq('access_code', code)
-          .single()
-
+        const { data, error } = await supabase.from('shopping_lists').select('*').eq('access_code', code).single()
         if (data && !error) {
-          setCurrentList(data)
-          setAccessCode(code)
-          setView('list')
+          setCurrentList(data); setAccessCode(code); setView('list')
         } else {
-          showNotification('Lista no encontrada', 'error')
-          navigate('/')
+          showNotification('Lista no encontrada', 'error'); navigate('/')
         }
         setIsLoading(false)
       }
@@ -1108,25 +986,12 @@ function App() {
     }
   }, [])
 
-  // Cargar supermercados al inicio
-  useEffect(() => {
-    loadSupermarkets()
-  }, [])
-
-  // Sincronizar view con URL
   useEffect(() => {
     const pathname = window.location.pathname
     if (pathname === '/' && view !== 'home') {
-      setView('home')
-      setCurrentList(null)
-      setItems([])
+      setView('home'); setCurrentList(null); setItems([])
     }
   }, [window.location.pathname])
-
-  useEffect(() => {
-    const timer = setTimeout(() => { if (newItemName) searchProductSuggestions(newItemName) }, 500)
-    return () => clearTimeout(timer)
-  }, [newItemName, searchProductSuggestions])
 
   useEffect(() => {
     if (!currentList) return
@@ -1139,28 +1004,23 @@ function App() {
     loadListSettings()
     const channel = supabase.channel(`list-${currentList.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shopping_items', filter: `list_id=eq.${currentList.id}` }, (payload) => {
-        // Para INSERT: solo ignorar si ya existe (por optimistic update)
         if (payload.eventType === 'INSERT') {
           setItems(prev => {
-            // Si ya existe un item con este ID (del optimistic update), reemplazarlo
             const exists = prev.some(item => item.id === payload.new.id)
             if (exists) return prev.map(item => item.id === payload.new.id ? payload.new : item)
-            // Si es totalmente nuevo, agregarlo solo si no es muy reciente (evitar duplicados de otros dispositivos)
             const eventTime = new Date(payload.new.created_at)
             if (Date.now() - eventTime < 1000) {
-              // Verificar si ya tenemos un temp item con el mismo nombre
               const hasTempWithSameName = prev.some(item =>
                 item.id.toString().startsWith('temp-') &&
                 item.name === payload.new.name &&
                 Math.abs(new Date(item.created_at) - eventTime) < 2000
               )
-              if (hasTempWithSameName) return prev // Ya lo tenemos como temp
+              if (hasTempWithSameName) return prev
             }
             return [payload.new, ...prev]
           })
         }
         else if (payload.eventType === 'UPDATE') {
-          // Para UPDATE: ignorar eventos recientes (probablemente nuestros)
           const eventTime = new Date(payload.new.updated_at || payload.commit_timestamp)
           if (Date.now() - eventTime < 2000) return
           setItems(prev => prev.map(item => item.id === payload.new.id ? payload.new : item))
@@ -1176,7 +1036,7 @@ function App() {
 
   const filteredItems = items
     .filter(item => filterCategory === 'all' || item.category === filterCategory)
-    .filter(item => shoppingMode ? !item.completed : true) // En modo compra, ocultar completados
+    .filter(item => shoppingMode ? !item.completed : true)
   const groupedItems = filteredItems.reduce((acc, item) => { if (!acc[item.category]) acc[item.category] = []; acc[item.category].push(item); return acc }, {})
   const sortedItems = [...filteredItems].sort((a, b) => { if (a.completed !== b.completed) return a.completed ? 1 : -1; return new Date(b.created_at) - new Date(a.created_at) })
   const activeCategories = [...new Set(items.map(item => item.category))]
@@ -1184,6 +1044,8 @@ function App() {
   const completedCount = items.filter(i => i.completed).length
   const pendingItems = totalItems - completedCount
   const progress = totalItems > 0 ? (completedCount / totalItems) * 100 : 0
+
+  const themeProps = { bgCard, bgInput, text, textMuted, border, bgHover }
 
   return (
     <div className={`min-h-screen ${bg} ${text} overflow-hidden transition-colors duration-300`}>
@@ -1196,7 +1058,7 @@ function App() {
       <AnimatePresence>
         {notification && (
           <motion.div initial={{ opacity: 0, y: -50, x: '-50%' }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }}
-            className={`fixed top-4 left-1/2 z-50 px-6 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl ${notification.type === 'error' ? 'bg-red-100 border-red-300 text-red-700' : 'bg-emerald-100 border-emerald-300 text-emerald-700'}`}>
+            className={`fixed top-4 left-1/2 z-50 px-6 py-3 rounded-2xl backdrop-blur-xl border shadow-2xl ${notification.type === 'error' ? 'bg-red-500/20 border-red-500/30 text-red-300' : 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300'}`}>
             <div className="flex items-center gap-2">{notification.type === 'error' ? <X className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}{notification.message}</div>
           </motion.div>
         )}
@@ -1206,19 +1068,25 @@ function App() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative min-h-screen flex flex-col items-center justify-center p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-lime-600 mb-6 shadow-2xl shadow-emerald-500/30">
-              <ShoppingCart className="w-12 h-12 text-white" />
+              <ClipboardList className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-4">
-              <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 bg-clip-text text-transparent">ListaCompra</span>
+              <span className="bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 bg-clip-text text-transparent">ShopList</span>
             </h1>
             <p className={`text-lg ${textMuted}`}>Listas compartidas en tiempo real</p>
           </motion.div>
+
+          {/* Theme toggle en home */}
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleTheme}
+            className={`absolute top-4 right-4 w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text} border ${border}`}>
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </motion.button>
 
           <div className="w-full max-w-md space-y-6">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`${bgCard} backdrop-blur-xl rounded-3xl p-6 border ${border}`}>
               <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Sparkles className="w-5 h-5 text-emerald-400" />Crear nueva lista</h2>
               <input type="text" placeholder="Nombre de la lista" value={newListName} onChange={(e) => setNewListName(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && createList()}
-                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 placeholder:${textMuted} ${text}`} />
+                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 ${text} placeholder:${textMuted}`} />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={createList} disabled={isLoading}
                 className="w-full py-3 bg-gradient-to-r from-emerald-600 to-lime-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Plus className="w-5 h-5" />Crear lista</>}
@@ -1230,7 +1098,7 @@ function App() {
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`${bgCard} backdrop-blur-xl rounded-3xl p-6 border ${border}`}>
               <h2 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Share2 className="w-5 h-5 text-emerald-400" />Unirse a lista</h2>
               <input type="text" placeholder="Código (6 caracteres)" value={accessCode} onChange={(e) => setAccessCode(e.target.value.toUpperCase())} onKeyPress={(e) => e.key === 'Enter' && joinList()} maxLength={6}
-                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none uppercase tracking-widest text-center text-xl font-mono placeholder:${textMuted} ${text}`} />
+                className={`w-full px-4 py-3 mb-3 ${bgInput} border ${border} rounded-2xl focus:outline-none uppercase tracking-widest text-center text-xl font-mono ${text} placeholder:${textMuted}`} />
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={joinList} disabled={isLoading || accessCode.length !== 6}
                 className="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg disabled:opacity-50">
                 {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><ArrowRight className="w-5 h-5" />Unirse</>}
@@ -1256,26 +1124,19 @@ function App() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Botón copiar código - compacto en móvil */}
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={copyCode}
                     className={`flex items-center gap-1.5 px-2 sm:px-3 py-2 ${bgInput} rounded-xl text-xs sm:text-sm ${bgHover} ${text} border ${border}`}>
                     {copiedCode ? <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                     <span className="font-mono tracking-wider text-xs">{currentList.access_code}</span>
                   </motion.button>
 
-                  {/* Botones ocultos en móvil */}
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { loadPriceComparison(); setShowPriceComparison(true); }}
-                    className={`hidden sm:flex w-10 h-10 rounded-xl ${bgInput} items-center justify-center ${bgHover} ${text} border ${border}`} title="Comparar precios">
-                    <TrendingDown className="w-5 h-5" />
-                  </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowFavorites(true)}
                     className={`hidden sm:flex w-10 h-10 rounded-xl ${bgInput} items-center justify-center ${bgHover} ${text} border ${border}`} title="Favoritos">
                     <Star className="w-5 h-5" />
                   </motion.button>
 
-                  {/* Botones siempre visibles */}
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => shareToWhatsApp(false)}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-green-600/20" title="Compartir por WhatsApp">
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={shareToWhatsApp}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-green-600/20" title="Compartir">
                     <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                   </motion.button>
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleTheme}
@@ -1289,12 +1150,18 @@ function App() {
                 </div>
               </div>
 
-              {/* Toggle modo compra */}
+              {/* Toggle modo compra + botón IA */}
               <div className="flex items-center gap-2 mb-4">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={toggleShoppingMode}
                   className={`flex-1 py-2 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 ${shoppingMode ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-600/20' : `${bgInput} ${bgHover} ${text} border ${border}`}`}>
-                  {shoppingMode ? <Check className="w-4 h-4" /> : <ShoppingBasket className="w-4 h-4" />}
+                  {shoppingMode ? <Check className="w-4 h-4" /> : <ListChecks className="w-4 h-4" />}
                   {shoppingMode ? 'Modo Compra Activo' : 'Activar Modo Compra'}
+                </motion.button>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowAIModal(true)}
+                  className="py-2 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/20">
+                  <Wand2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Generar con IA</span>
+                  <span className="sm:hidden">IA</span>
                 </motion.button>
               </div>
 
@@ -1307,26 +1174,11 @@ function App() {
 
               <div className="relative">
                 <form onSubmit={addItem} className="flex gap-2">
-                  <input ref={inputRef} type="text" placeholder="Añadir producto..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
-                    onFocus={() => productSuggestions.length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  <input ref={inputRef} type="text" placeholder="Añadir elemento..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)}
                     className={`flex-1 px-4 py-3 ${bgInput} border ${border} rounded-2xl focus:outline-none focus:border-emerald-500/50 ${text} placeholder:${textMuted}`} />
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} type="submit"
                     className="w-12 h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-lime-600 text-white flex items-center justify-center shadow-lg"><Plus className="w-6 h-6" /></motion.button>
                 </form>
-                {showSuggestions && productSuggestions.length > 0 && (
-                  <div className={`absolute top-full left-0 right-14 mt-2 ${bgCard} border ${border} rounded-2xl overflow-hidden shadow-2xl z-50 max-h-64 overflow-y-auto`}>
-                    {productSuggestions.map((sug, i) => (
-                      <button key={i} onClick={() => selectSuggestion(sug)} className={`w-full px-4 py-3 flex items-center gap-3 ${bgHover} text-left ${text}`}>
-                        {sug.image && <img src={sug.image} alt="" className="w-10 h-10 rounded object-cover" />}
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">{sug.brand && <span className="text-emerald-400">{sug.brand}</span>} {sug.name}</div>
-                          {sug.category && <div className={`text-xs ${textMuted} truncate`}>{sug.category}</div>}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center gap-2 mt-4">
@@ -1354,7 +1206,12 @@ function App() {
             {filteredItems.length === 0 ? (
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
                 <div className={`w-20 h-20 rounded-3xl ${bgInput} flex items-center justify-center mx-auto mb-4`}><Package className={`w-10 h-10 ${textMuted}`} /></div>
-                <h3 className={`text-xl font-semibold mb-2 ${text}`}>Lista vacía</h3><p className={textMuted}>Añade tu primer producto</p>
+                <h3 className={`text-xl font-semibold mb-2 ${text}`}>Lista vacía</h3>
+                <p className={textMuted}>Añade tu primer elemento o genera una lista con IA</p>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowAIModal(true)}
+                  className="mt-4 py-2 px-6 rounded-xl font-semibold text-sm bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg inline-flex items-center gap-2">
+                  <Wand2 className="w-4 h-4" />Generar con IA
+                </motion.button>
               </motion.div>
             ) : viewMode === 'compact' ? (
               <div className="space-y-2">
@@ -1363,24 +1220,15 @@ function App() {
                     <motion.div key={item.id} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20, scale: 0.9 }}
                       className={`group flex items-center gap-3 p-3 rounded-xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : `${bgInput} ${border} ${bgHover}`}`}>
                       <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleComplete(item)}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput}`}`}>
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput} border ${border}`}`}>
                         {item.completed ? <Check className="w-4 h-4" /> : <Circle className={`w-4 h-4 ${textMuted}`} />}
                       </motion.button>
                       <span className="text-lg">{CATEGORY_ICONS[item.category]}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className={`font-medium ${item.completed ? `line-through ${textMuted}` : text}`}>{item.name}</span>
-                          {item.product_url && (
-                            <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                              className="text-emerald-400 hover:text-emerald-300 flex-shrink-0">
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
-                          {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
-                        </div>
+                        {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
                       </div>
                       <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100">
                         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleFavorite(item)}
@@ -1409,23 +1257,14 @@ function App() {
                       {categoryItems.map((item) => (
                         <motion.div key={item.id} layout className={`group flex items-center gap-3 p-4 rounded-2xl border ${item.completed ? 'bg-emerald-500/10 border-emerald-500/20' : `${bgInput} ${border} ${bgHover}`}`}>
                           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => toggleComplete(item)}
-                            className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput}`}`}>
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center ${item.completed ? 'bg-emerald-500 text-white' : `${bgInput} border ${border}`}`}>
                             {item.completed ? <Check className="w-5 h-5" /> : <Circle className={`w-5 h-5 ${textMuted}`} />}
                           </motion.button>
                           <div className="flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className={`font-medium ${item.completed ? `line-through ${textMuted}` : text}`}>{item.name}</span>
-                              {item.product_url && (
-                                <a href={item.product_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                                  className="text-emerald-400 hover:text-emerald-300 flex-shrink-0">
-                                  <ExternalLink className="w-3.5 h-3.5" />
-                                </a>
-                              )}
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
-                              {!item.completed && <InlinePriceComparator item={item} supermarkets={supermarkets} priceEstimates={priceEstimates} getDeepLink={getDeepLink} />}
-                            </div>
+                            {formatQuantity(item.quantity, item.unit) && <span className={`text-xs ${textMuted}`}>{formatQuantity(item.quantity, item.unit)}</span>}
                           </div>
                           <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100">
                             <motion.button whileHover={{ scale: 1.1 }} onClick={() => toggleFavorite(item)} className={`w-8 h-8 rounded-xl flex items-center justify-center ${isFavorite(item.name) ? 'text-yellow-400' : `${bgInput} hover:bg-yellow-500/20`}`}>
@@ -1444,10 +1283,10 @@ function App() {
           </main>
 
           {completedCount > 0 && (
-            <motion.div initial={{ y: 100 }} animate={{ y: 0 }} className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0a0a0f] to-transparent">
+            <motion.div initial={{ y: 100 }} animate={{ y: 0 }} className={`fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t ${isDark ? 'from-[#121212]' : 'from-gray-50'} to-transparent`}>
               <div className="max-w-2xl mx-auto">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={clearCompleted}
-                  className="w-full py-4 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center gap-2 hover:bg-gray-200">
+                  className={`w-full py-4 rounded-2xl ${bgCard} border ${border} flex items-center justify-center gap-2 ${bgHover} ${text}`}>
                   <ListChecks className="w-5 h-5" />Limpiar {completedCount} completados
                 </motion.button>
               </div>
@@ -1462,8 +1301,8 @@ function App() {
             <div className="max-w-2xl mx-auto px-4 py-4">
               <div className="flex items-center gap-3">
                 <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setView('list')}
-                  className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"><ArrowRight className="w-5 h-5 rotate-180" /></motion.button>
-                <div><h1 className="text-xl font-bold">Estadísticas</h1><p className="text-sm text-gray-500">Patrones de compra</p></div>
+                  className={`w-10 h-10 rounded-xl ${bgInput} flex items-center justify-center ${bgHover} ${text} border ${border}`}><ArrowRight className="w-5 h-5 rotate-180" /></motion.button>
+                <div><h1 className={`text-xl font-bold ${text}`}>Estadísticas</h1><p className={`text-sm ${textMuted}`}>Patrones de uso</p></div>
               </div>
             </div>
           </header>
@@ -1474,50 +1313,50 @@ function App() {
             ) : stats ? (
               <>
                 <div className="grid grid-cols-2 gap-4">
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-lime-500/20 border border-emerald-500/20">
-                    <TrendingUp className="w-6 h-6 text-emerald-400 mb-2" /><div className="text-3xl font-bold">{stats.totalPurchases}</div><div className="text-sm text-gray-500">Compras totales</div>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-lime-500/20 border border-emerald-500/20`}>
+                    <TrendingUp className="w-6 h-6 text-emerald-400 mb-2" /><div className={`text-3xl font-bold ${text}`}>{stats.totalPurchases}</div><div className={`text-sm ${textMuted}`}>Completados</div>
                   </motion.div>
-                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20">
-                    <Calendar className="w-6 h-6 text-emerald-400 mb-2" /><div className="text-xl font-bold">{stats.mostActiveDay}</div><div className="text-sm text-gray-500">Día más activo</div>
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-4 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20`}>
+                    <Calendar className="w-6 h-6 text-emerald-400 mb-2" /><div className={`text-xl font-bold ${text}`}>{stats.mostActiveDay}</div><div className={`text-sm ${textMuted}`}>Día más activo</div>
                   </motion.div>
                 </div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-3xl bg-gray-100 border border-gray-200">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Package className="w-5 h-5 text-emerald-400" />Top productos</h3>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-6 rounded-3xl ${bgCard} border ${border}`}>
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Package className="w-5 h-5 text-emerald-400" />Top elementos</h3>
                   <div className="space-y-3">
                     {stats.topProducts.length > 0 ? stats.topProducts.map(([name, count], i) => (
                       <div key={name} className="flex items-center gap-3">
-                        <span className="w-6 h-6 rounded-lg bg-gray-200 flex items-center justify-center text-sm font-medium">{i+1}</span>
+                        <span className={`w-6 h-6 rounded-lg ${bgInput} flex items-center justify-center text-sm font-medium ${text}`}>{i+1}</span>
                         <div className="flex-1">
-                          <div className="flex justify-between mb-1"><span className="font-medium">{name}</span><span className="text-gray-500">{count}x</span></div>
-                          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="flex justify-between mb-1"><span className={`font-medium ${text}`}>{name}</span><span className={textMuted}>{count}x</span></div>
+                          <div className={`h-1.5 ${bgInput} rounded-full overflow-hidden`}>
                             <motion.div initial={{ width: 0 }} animate={{ width: `${(count / stats.topProducts[0][1]) * 100}%` }} className="h-full bg-gradient-to-r from-emerald-500 to-lime-500 rounded-full" />
                           </div>
                         </div>
                       </div>
-                    )) : <p className="text-gray-500 text-center py-4">Aún no hay datos</p>}
+                    )) : <p className={`${textMuted} text-center py-4`}>Aún no hay datos</p>}
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-3xl bg-gray-100 border border-gray-200">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><PieChart className="w-5 h-5 text-emerald-400" />Categorías</h3>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-6 rounded-3xl ${bgCard} border ${border}`}>
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><PieChart className="w-5 h-5 text-emerald-400" />Categorías</h3>
                   <div className="space-y-3">
                     {stats.categoryStats.length > 0 ? stats.categoryStats.map(([category, count]) => (
                       <div key={category} className="flex items-center gap-3">
                         <span className="text-2xl">{CATEGORY_ICONS[category]}</span>
                         <div className="flex-1">
-                          <div className="flex justify-between mb-1"><span className="font-medium">{category}</span><span className="text-gray-500">{count}</span></div>
-                          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="flex justify-between mb-1"><span className={`font-medium ${text}`}>{category}</span><span className={textMuted}>{count}</span></div>
+                          <div className={`h-1.5 ${bgInput} rounded-full overflow-hidden`}>
                             <motion.div initial={{ width: 0 }} animate={{ width: `${(count / stats.categoryStats[0][1]) * 100}%` }} className={`h-full bg-gradient-to-r ${CATEGORY_COLORS[category]} rounded-full`} />
                           </div>
                         </div>
                       </div>
-                    )) : <p className="text-gray-500 text-center py-4">Aún no hay datos</p>}
+                    )) : <p className={`${textMuted} text-center py-4`}>Aún no hay datos</p>}
                   </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 rounded-3xl bg-gray-100 border border-gray-200">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Calendar className="w-5 h-5 text-cyan-400" />Patrón semanal</h3>
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`p-6 rounded-3xl ${bgCard} border ${border}`}>
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${text}`}><Calendar className="w-5 h-5 text-cyan-400" />Patrón semanal</h3>
                   <div className="flex justify-between items-end h-32">
                     {stats.dayNames.map((day, i) => {
                       const count = stats.dayOfWeekCounts[i] || 0
@@ -1526,8 +1365,8 @@ function App() {
                       return (
                         <div key={day} className="flex flex-col items-center gap-2 flex-1">
                           <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(height, 5)}%` }}
-                            className={`w-8 rounded-t-lg ${i === new Date().getDay() ? 'bg-gradient-to-t from-cyan-500 to-cyan-400' : 'bg-gray-200'}`} />
-                          <span className="text-xs text-gray-500">{day}</span>
+                            className={`w-8 rounded-t-lg ${i === new Date().getDay() ? 'bg-gradient-to-t from-cyan-500 to-cyan-400' : `${bgInput}`}`} />
+                          <span className={`text-xs ${textMuted}`}>{day}</span>
                         </div>
                       )
                     })}
@@ -1541,12 +1380,6 @@ function App() {
 
       {/* Paneles flotantes */}
       <AnimatePresence>
-        <PriceComparisonPanel
-          show={showPriceComparison}
-          onClose={() => setShowPriceComparison(false)}
-          priceComparison={priceComparison}
-          onShare={() => shareToWhatsApp(true)}
-        />
         <FavoritesView
           show={showFavorites}
           onClose={() => setShowFavorites(false)}
@@ -1554,8 +1387,15 @@ function App() {
           onAdd={addFromFavorite}
           searchTerm={favoriteSearchTerm}
           setSearchTerm={setFavoriteSearchTerm}
+          theme={themeProps}
         />
-        {editingItem && <EditModal item={editingItem} supermarkets={supermarkets} onSave={updateItem} onClose={() => setEditingItem(null)} theme={{ bgCard, bgInput, text, textMuted, border, bgHover }} />}
+        <AIGenerateModal
+          show={showAIModal}
+          onClose={() => setShowAIModal(false)}
+          onGenerate={generateWithAI}
+          theme={themeProps}
+        />
+        {editingItem && <EditModal item={editingItem} onSave={updateItem} onClose={() => setEditingItem(null)} theme={themeProps} />}
       </AnimatePresence>
     </div>
   )
