@@ -463,16 +463,16 @@ function App() {
       return generateLocalList(prompt)
     }
 
-    const systemPrompt = `Eres un asistente que genera listas de elementos. El usuario te pedirá una lista para un propósito específico.
-Responde SOLO con un JSON array de objetos, sin explicaciones ni texto adicional. Cada objeto debe tener:
-- "name": nombre del elemento (string)
-- "quantity": cantidad numérica (number)
-- "unit": unidad (string, una de: unidad, kg, g, L, ml, docena, paquete, lata, botella, bolsa, bote, tarrina, bandeja, manojo, racimo)
+    const systemPrompt = `Eres un asistente experto en generar listas prácticas. El usuario describirá qué necesita y tú generarás la lista EXACTA para ese propósito.
 
-Ejemplo de respuesta:
-[{"name":"Manzanas","quantity":6,"unit":"unidad"},{"name":"Arroz","quantity":1,"unit":"kg"}]
+IMPORTANTE: Genera elementos específicos para lo que pide el usuario. Si pide una lista de viaje, genera cosas de viaje (ropa, documentos, accesorios). Si pide una lista de fiesta, genera cosas de fiesta. Si pide lista de compra, genera alimentos. NO mezcles tipos.
 
-Genera entre 10 y 30 elementos según la complejidad de la petición. Sé práctico y realista.`
+Responde ÚNICAMENTE con un JSON array válido, sin markdown, sin explicaciones, sin backticks. Cada objeto:
+- "name": nombre del elemento en español (string)
+- "quantity": cantidad numérica (number, mínimo 1)
+- "unit": unidad (string, una de: unidad, kg, g, L, ml, docena, paquete, lata, botella, bolsa, bote, bandeja)
+
+Genera entre 12 y 25 elementos. Sé práctico, específico y realista. Adapta cantidades al número de personas si se indica.`
 
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -484,7 +484,7 @@ Genera entre 10 y 30 elementos según la complejidad de la petición. Sé práct
         model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt }
+          { role: 'user', content: `Genera una lista para: ${prompt}` }
         ],
         temperature: 0.7,
         max_tokens: 2000
@@ -492,17 +492,29 @@ Genera entre 10 y 30 elementos según la complejidad de la petición. Sé práct
     })
 
     if (!res.ok) {
-      throw new Error('Error al conectar con la IA. Verifica tu API key de Groq.')
+      const errorData = await res.json().catch(() => ({}))
+      throw new Error(errorData?.error?.message || 'Error al conectar con la IA')
     }
 
     const data = await res.json()
     const content = data.choices?.[0]?.message?.content || ''
 
-    // Extraer JSON del response
-    const jsonMatch = content.match(/\[[\s\S]*\]/)
-    if (!jsonMatch) throw new Error('La IA no generó una respuesta válida')
+    // Extraer JSON del response (buscar array incluso si viene envuelto en markdown)
+    const cleaned = content.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
+    const jsonMatch = cleaned.match(/\[[\s\S]*\]/)
+    if (!jsonMatch) throw new Error('La IA no generó una respuesta válida. Intenta de nuevo.')
 
-    const generatedItems = JSON.parse(jsonMatch[0])
+    let generatedItems
+    try {
+      generatedItems = JSON.parse(jsonMatch[0])
+    } catch {
+      throw new Error('Error al procesar la respuesta de la IA. Intenta de nuevo.')
+    }
+
+    if (!Array.isArray(generatedItems) || generatedItems.length === 0) {
+      throw new Error('La IA no generó elementos. Intenta con otra descripción.')
+    }
+
     await addGeneratedItems(generatedItems)
   }
 
